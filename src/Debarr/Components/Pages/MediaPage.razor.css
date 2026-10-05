@@ -1,0 +1,105 @@
+.media {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.media-file-name,
+.media-folder,
+.media-other-path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* One block, so a phone's card stacks the paths beneath their label's line. */
+.media-paths {
+    min-width: 0;
+}
+
+.media-path {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* A failure's error shows its first two lines, and the whole of it on hover. */
+.media-error {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.media-file-name,
+.media-folder,
+.media-other-path {
+    max-width: 32vw;
+}
+
+.media-error {
+    max-width: 18vw;
+}
+
+.media-folder,
+.media-other-path,
+.media-raw,
+.media-error {
+    font-size: 0.75rem;
+}
+
+/* A running file's status and how long it has run share one line, so the row keeps its height. */
+.media-detecting {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+::deep .media-first-seen,
+.media-not-sent,
+.media-detecting {
+    white-space: nowrap;
+}
+
+/* A touch screen can't show the icon's tooltip, so a card shows a labelled button instead. */
+::deep .media-detect-button {
+    display: none;
+}
+
+/* The table lays each row out as a card up to 960 px, with the value beside its label. */
+@media (max-width: 960px) {
+    .media-file-name,
+    .media-folder,
+    .media-other-path {
+        max-width: 55vw;
+    }
+
+    /* A phone has no hover, so a card shows the whole error. */
+    .media-error {
+        max-width: 55vw;
+        -webkit-line-clamp: unset;
+    }
+
+    ::deep .media-detect-icon {
+        display: none;
+    }
+
+    ::deep .media-detect-button {
+        display: block;
+    }
+
+    /* A card leaves out a value the file doesn't have yet, such as a failed file's ratio. */
+    ::deep .media-empty {
+        display: none !important;
+    }
+}
+
+.media-cell {
+    min-width: 0;
+}
+
+/* The copy button sits at the cell's end, so the buttons line up down the column. */
+.media-path .media-cell {
+    flex: 1;
+}

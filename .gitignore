@@ -1,0 +1,6 @@
+.claude/
+bin/
+obj/
+**/TestResults
+.dev/
+*.db*

@@ -1,0 +1,14 @@
+@using Debarr.Extensions
+@if (Outcome is PlaybackOutcome.Sent sent)
+{
+    var display = DisplayOf(sent.Source);
+    <StateLabel Class="playback-outcome" Icon="@display.Icon" Color="@display.Color">@sent.AspectRatio.ToAspectRatioText() @display.Text</StateLabel>
+}
+else
+{
+    <StateLabel Class="playback-outcome" Icon="@Icons.Material.Outlined.Block">Not sent: @NotSentText(Outcome)</StateLabel>
+    @if (Outcome is PlaybackOutcome.Failed failed)
+    {
+        <div><StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@failed.Error</StateLabel></div>
+    }
+}

@@ -1,0 +1,48 @@
+@inherits NotifierModalBase<MqttNotifierForm>
+
+<IntegrationModal Modal="this" IdPrefix="mqtt" Removable="!Form.IsNew">
+    <MudGrid>
+        <MudItem xs="12">
+            <SwitchField @bind-Value="Form.Enabled" id="mqtt-enabled" Label="Enable" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Form.Name" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Name)))" id="mqtt-name" Label="Name"
+                          @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Name))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Form.Url" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Url)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Url))" id="mqtt-url" Label="URL"
+                          HelperText="Such as mqtt://broker.lan:1883. mqtts:// connects over TLS."
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        @if (ShowAdvanced.Shown)
+        {
+            <MudItem xs="12" sm="8">
+                <MudTextField @bind-Value="Form.ClientId" id="mqtt-client-id" Label="Client ID"
+                              HelperText="Empty lets the client generate one"
+                              Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="Form.Qos" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Qos)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Qos))" id="mqtt-qos" Label="QoS"
+                                 HelperText="0 delivers at most once, 1 at least once, 2 exactly once"
+                                 Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        }
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="Form.Username" id="mqtt-username" Label="Username"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="Form.Password" id="mqtt-password" Label="Password"
+                          InputType="@(_passwordShown ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End" AdornmentIcon="@(_passwordShown ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                          AdornmentAriaLabel="@(_passwordShown ? "Hide password" : "Show password")" OnAdornmentClick="TogglePasswordShown"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Form.TopicTemplate" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.TopicTemplate)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.TopicTemplate))" id="mqtt-topic-template" Label="Topic Template"
+                          HelperText="{player} becomes the player's name"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+    </MudGrid>
+</IntegrationModal>

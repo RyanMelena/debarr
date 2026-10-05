@@ -1,0 +1,32 @@
+@inherits LiveComponentBase
+
+@if (Compact)
+{
+    @if (_work.Count > 0)
+    {
+        <MudButton id="running-work-summary" Class="running-work-summary" Variant="Variant.Text" Color="Color.Inherit" OnClick="OnClick"
+                   aria-label="@($"{Summary}. Show the navigation.")">
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Inherit" Class="running-work-progress" />
+            <span class="running-work-summary-text">@Summary</span>
+        </MudButton>
+    }
+}
+else
+{
+    <MotionList id="running-work" role="status" Items="_work" Key="work => work.Key">
+        <div class="running-work-item @context.Class" id="@context.Item.Id">
+            <div>
+                <div class="running-work-content">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Info" Class="running-work-progress" />
+                    <div class="running-work-text" title="@context.Item.Title">
+                        <MudLink Href="@context.Item.Href" Typo="Typo.body2"><PathText Value="@context.Item.Text" /></MudLink>
+                        @if (context.Item.StartedAt is { } startedAt)
+                        {
+                            <div class="mud-text-secondary numeric"><ElapsedTime Since="startedAt" /></div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </MotionList>
+}

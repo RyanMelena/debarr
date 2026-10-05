@@ -1,0 +1,257 @@
+@page "/system/status"
+@using Debarr.Health
+@inherits LiveComponentBase
+
+<PageTitle>Status - Debarr</PageTitle>
+
+<PageHeader Title="Status" />
+
+<div class="status d-flex flex-column gap-6">
+    @if (_players is null)
+    {
+        <MudProgressLinear Indeterminate="true" />
+    }
+    else
+    {
+        <PageSection Title="Health">
+            @if (_health.Count == 0)
+            {
+                <div id="status-health-none"><StateLabel Icon="@Icons.Material.Outlined.CheckCircle" Color="Color.Success">No problems found.</StateLabel></div>
+            }
+            else
+            {
+                <MotionList id="status-health" Items="_health" Key="message => message.Text">
+                    <div class="@context.Class">
+                        <div class="status-health-item">
+                            <MudAlert Class="status-health-message status-wrap" Severity="@(context.Item.Severity == HealthSeverity.Error ? Severity.Error : Severity.Warning)" Dense="true">
+                                <div><PathText Value="@context.Item.Text" /></div>
+                                <div class="mud-text-secondary">
+                                    @if (context.Item.Since is { } since)
+                                    {
+                                        <span>Since <DateTimeText Value="since" /> · </span>
+                                    }
+                                    <MudLink Href="@context.Item.Href" Typo="Typo.body2" Class="status-health-link">@context.Item.LinkText</MudLink>
+                                </div>
+                            </MudAlert>
+                        </div>
+                    </div>
+                </MotionList>
+            }
+        </PageSection>
+
+        <PageSection Title="Library">
+            @if (_roots.Count == 0)
+            {
+                <MudText id="status-root-folders-empty">No root folder yet. <MudLink Href="settings/library">Add one in Settings &gt; Library</MudLink>.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="status-root-folders" Class="status-table stacked-table" Dense="true" Elevation="0">
+                    <colgroup>
+                        <col />
+                        <col class="status-column-state" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Root Folder</th>
+                            <th>Last Scan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _roots)
+                        {
+                            <tr @key="row.Path" class="status-root-folder" id="@(row.Removal is null ? null : "status-root-folder-removing")">
+                                <td>
+                                    <div><PathText Value="@row.Path" /></div>
+                                    @if (row.RootFolder is { Enabled: false })
+                                    {
+                                        <div class="mud-text-secondary">Disabled</div>
+                                    }
+                                    @if (row.LastScan?.Error is { } scanError)
+                                    {
+                                        <div class="status-root-folder-scan-error"><StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@scanError</StateLabel></div>
+                                    }
+                                </td>
+                                <td class="status-root-folder-last-scan" data-label="Last Scan">
+                                    @if (row.Removal is { } removal)
+                                    {
+                                        <RootFolderRemovalText StartedAt="removal.StartedAt" />
+                                    }
+                                    else
+                                    {
+                                        <LastScanText Scan="LastScanText.Of(row.LastScan)" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </PageSection>
+
+        <PageSection Title="Detection">
+            <div class="d-flex gap-6">
+                <MudLink id="status-pending" Href="?status=pending">@_pendingCount.ToCountText() pending</MudLink>
+                <MudLink id="status-failed" Href="?status=failed">
+                    @if (_failedCount > 0)
+                    {
+                        <StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@_failedCount.ToCountText() failed</StateLabel>
+                    }
+                    else
+                    {
+                        @($"{_failedCount.ToCountText()} failed")
+                    }
+                </MudLink>
+            </div>
+        </PageSection>
+
+        <PageSection Title="Players">
+            @if (_players.Count == 0)
+            {
+                <MudText id="status-players-empty">No player yet. <MudLink Href="settings/players">Add one in Settings &gt; Players</MudLink>.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="status-players" Class="status-table stacked-table" Dense="true" Elevation="0">
+                    <colgroup>
+                        <col class="status-column-name" />
+                        <col class="status-column-state" />
+                        <col />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Connection</th>
+                            <th>Last Playback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var player in _players)
+                        {
+                            <tr @key="player.Name" class="status-player">
+                                <td>@player.Name</td>
+                                <td class="status-player-connection status-wrap stacked-table-block" data-label="Connection">
+                                    @if (player.Enabled)
+                                    {
+                                        <PlayerConnectionStateText State="player.State" />
+                                    }
+                                    else
+                                    {
+                                        <span class="mud-text-secondary">Disabled</span>
+                                    }
+                                </td>
+                                <td class="status-player-last-playback status-wrap stacked-table-block" data-label="Last Playback">
+                                    @if (player.LastPlayback is { } playback)
+                                    {
+                                        <div>
+                                            <DateTimeText Value="playback.OccurredAt" />@(playback.Title is { } title ? $" · {title}" : "")
+                                        </div>
+                                        <div class="mud-text-secondary">
+                                            @if (playback.VideoFile is { } videoFile)
+                                            {
+                                                <MudLink Href="@($"video-file/{videoFile}")" Typo="Typo.body2"><PathText Value="@playback.LocalPath?.Value" /></MudLink>
+                                            }
+                                            else
+                                            {
+                                                <PathText Value="@playback.Path" />
+                                            }
+                                        </div>
+                                        <div><PlaybackOutcomeText Outcome="playback.Outcome" /></div>
+                                    }
+                                    else
+                                    {
+                                        <span class="mud-text-secondary">No playback yet</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </PageSection>
+
+        <PageSection Title="Notifiers">
+            @if (_notifiers.Count == 0)
+            {
+                <MudText id="status-notifiers-empty">No notifier yet. <MudLink Href="settings/notifiers">Add one in Settings &gt; Notifiers</MudLink>.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="status-notifiers" Class="status-table stacked-table" Dense="true" Elevation="0">
+                    <colgroup>
+                        <col class="status-column-name" />
+                        <col />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Notifier</th>
+                            <th>Recent Deliveries</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var notifier in _notifiers)
+                        {
+                            <tr @key="notifier.Name" class="status-notifier">
+                                <td>
+                                    <div>@notifier.Name</div>
+                                    @if (!notifier.Enabled)
+                                    {
+                                        <div class="mud-text-secondary">Disabled</div>
+                                    }
+                                </td>
+                                <td class="status-notifier-deliveries status-wrap stacked-table-block" data-label="Recent Deliveries">
+                                    <div>
+                                        @if (notifier.Deliveries.Count == 0)
+                                        {
+                                            <span class="mud-text-secondary">No delivery yet</span>
+                                        }
+                                        <MotionList Items="notifier.Deliveries" Key="delivery => delivery.Id">
+                                            <div class="@context.Class">
+                                                <div><DateTimeText Value="context.Item.StartedAt" /> · <DeliveryOutcomeText Delivery="context.Item" /></div>
+                                            </div>
+                                        </MotionList>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </PageSection>
+    }
+
+    <PageSection Title="About">
+        <MudSimpleTable Dense="true" Elevation="0">
+            <tbody>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td id="status-version" class="status-wrap" title="@Version">@ShortVersion</td>
+                </tr>
+                <tr>
+                    <th scope="row">Started</th>
+                    <td id="status-started"><DateTimeText Value="StartedAt" /></td>
+                </tr>
+                <tr>
+                    <th scope="row">.NET</th>
+                    <td id="status-runtime">@Runtime</td>
+                </tr>
+                <tr>
+                    <th scope="row">ffmpeg</th>
+                    <td id="status-ffmpeg" class="status-wrap">@_ffmpegVersion</td>
+                </tr>
+                <tr>
+                    <th scope="row">ffprobe</th>
+                    <td id="status-ffprobe" class="status-wrap">@_ffprobeVersion</td>
+                </tr>
+                <tr>
+                    <th scope="row">OS</th>
+                    <td id="status-os" class="status-wrap">@OperatingSystem</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data Directory</th>
+                    <td id="status-data-directory"><PathText Value="@DataDirectory" /></td>
+                </tr>
+            </tbody>
+        </MudSimpleTable>
+    </PageSection>
+</div>

@@ -1,0 +1,28 @@
+M:Fisher.Events.EventOperations.Append(System.Guid,System.Object[]);Append at the version of the facts the decision read: [WriteModel], FisherOps.StartStream, or FisherOps.Append(id, expectedVersion, events).
+M:Fisher.Events.EventOperations.Append(System.Guid,System.Collections.Generic.IEnumerable{System.Object});Append at the version of the facts the decision read: [WriteModel], FisherOps.StartStream, or FisherOps.Append(id, expectedVersion, events).
+M:Fisher.Events.EventOperations.Append(System.String,System.Object[]);Append at the version of the facts the decision read: [WriteModel], FisherOps.StartStream, or FisherOps.Append(id, expectedVersion, events).
+M:Fisher.Events.EventOperations.Append(System.String,System.Collections.Generic.IEnumerable{System.Object});Append at the version of the facts the decision read: [WriteModel], FisherOps.StartStream, or FisherOps.Append(id, expectedVersion, events).
+M:Fisher.Events.EventOperations.AppendOptimistic(System.Guid,System.Threading.CancellationToken,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendOptimistic(System.Guid,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendOptimistic(System.String,System.Threading.CancellationToken,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendOptimistic(System.String,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendExclusive(System.Guid,System.Threading.CancellationToken,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendExclusive(System.Guid,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendExclusive(System.String,System.Threading.CancellationToken,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Fisher.Events.EventOperations.AppendExclusive(System.String,System.Object[]);It states the stream's version now, not the version of the facts the decision read.
+M:Wolverine.Fisher.FisherOps.Append(System.Guid,System.Object[]);Append at the version of the facts the decision read: FisherOps.Append(id, expectedVersion, events).
+M:Wolverine.Fisher.FisherOps.Append(System.String,System.Object[]);Append at the version of the facts the decision read: FisherOps.Append(id, expectedVersion, events).
+M:Wolverine.Fisher.AppendToStream.#ctor(System.Guid,System.Object[]);Append at the version of the facts the decision read: FisherOps.Append(id, expectedVersion, events).
+M:Wolverine.Fisher.AppendToStream.#ctor(System.String,System.Object[]);Append at the version of the facts the decision read: FisherOps.Append(id, expectedVersion, events).
+M:Wolverine.Runtime.MessageBus.InvokeAsync(System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.Runtime.MessageBus.InvokeAsync(System.Object,Wolverine.DeliveryOptions,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.Runtime.MessageBus.InvokeAsync``1(System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.Runtime.MessageBus.InvokeAsync``1(System.Object,Wolverine.DeliveryOptions,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.ICommandBus.InvokeAsync(System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.ICommandBus.InvokeAsync(System.Object,Wolverine.DeliveryOptions,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.ICommandBus.InvokeAsync``1(System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.ICommandBus.InvokeAsync``1(System.Object,Wolverine.DeliveryOptions,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.Runtime.MessageBus.InvokeForTenantAsync(System.String,System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.Runtime.MessageBus.InvokeForTenantAsync``1(System.String,System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.IMessageBus.InvokeForTenantAsync(System.String,System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.
+M:Wolverine.IMessageBus.InvokeForTenantAsync``1(System.String,System.Object,System.Threading.CancellationToken,System.Nullable{System.TimeSpan});Every command runs through SendCommandAsync, which retries a write conflict.

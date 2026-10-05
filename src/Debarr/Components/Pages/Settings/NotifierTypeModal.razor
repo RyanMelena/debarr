@@ -1,0 +1,18 @@
+<MudDialog>
+    <DialogContent>
+        <MudGrid Spacing="2">
+            @foreach (var notifierType in NotifierTypes)
+            {
+                <MudItem xs="12" sm="6">
+                    <CardButton id="@notifierType.Id" Class="notifier-type" OnClick="@(() => Choose(notifierType))">
+                        <MudText Typo="Typo.h6">@notifierType.Name</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@notifierType.Description</MudText>
+                    </CardButton>
+                </MudItem>
+            }
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton id="notifier-type-cancel" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>

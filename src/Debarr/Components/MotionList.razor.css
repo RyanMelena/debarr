@@ -1,0 +1,76 @@
+/* A row fades in under a tint that fades with it, and fades out before it leaves. */
+tbody.motion-list ::deep .motion-row-enter {
+    animation: motion-row-enter 250ms ease-out;
+}
+
+tbody.motion-list ::deep .motion-row-leave {
+    animation: motion-fade-out 200ms ease-in forwards;
+    pointer-events: none;
+}
+
+/* A block grows into place as it fades in, and shrinks away as it fades out, so the blocks around it slide rather than jump. */
+div.motion-list ::deep .motion-enter,
+div.motion-list ::deep .motion-leave {
+    display: grid;
+    grid-template-rows: 1fr;
+}
+
+    div.motion-list ::deep .motion-enter > *,
+    div.motion-list ::deep .motion-leave > * {
+        min-height: 0;
+        overflow: hidden;
+    }
+
+div.motion-list ::deep .motion-enter {
+    animation: motion-block-enter 200ms ease-out;
+}
+
+div.motion-list ::deep .motion-leave {
+    animation: motion-block-leave 200ms ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes motion-row-enter {
+    from {
+        opacity: 0;
+        background-color: var(--mud-palette-action-default-hover);
+    }
+
+    to {
+        opacity: 1;
+        background-color: transparent;
+    }
+}
+
+@keyframes motion-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes motion-block-enter {
+    from {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+}
+
+@keyframes motion-block-leave {
+    to {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    tbody.motion-list ::deep .motion-row-enter,
+    div.motion-list ::deep .motion-enter {
+        animation: none;
+    }
+
+    tbody.motion-list ::deep .motion-row-leave,
+    div.motion-list ::deep .motion-leave {
+        animation: none;
+        display: none;
+    }
+}

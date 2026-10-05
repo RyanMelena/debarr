@@ -1,0 +1,52 @@
+@inherits NotifierModalBase<WebhookNotifierForm>
+
+<IntegrationModal Modal="this" IdPrefix="webhook" Removable="!Form.IsNew">
+    <MudGrid>
+        <MudItem xs="12">
+            <SwitchField @bind-Value="Form.Enabled" id="webhook-enabled" Label="Enable" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Form.Name" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Name)))" id="webhook-name" Label="Name"
+                          @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Name))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="9">
+            <MudTextField @bind-Value="Form.Url" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Url)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Url))" id="webhook-url" Label="URL"
+                          HelperText="Such as http://automation.lan:9099/debarr" Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect T="WebhookMethod" @bind-Value="Form.Method" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Method)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Method))" id="webhook-method" Label="Method"
+                       ToStringFunc="@(method => method.ToHttpMethod().Method)" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var method in Enum.GetValues<WebhookMethod>())
+                {
+                    <MudSelectItem T="WebhookMethod" Value="@method">@method.ToHttpMethod().Method</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.subtitle2" Class="mt-5">Headers</MudText>
+    <div>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">
+            Sent with every request, beside a Content-Type of application/json, such as an Authorization header.
+        </MudText>
+    </div>
+
+    @foreach (var header in Form.Headers)
+    {
+        <div class="d-flex align-start gap-2 mt-2" @key="header">
+            <MudTextField @bind-Value="header.Name" @bind-Value:after="@(() => ModalAction.ClearFieldError(HeaderNameField(header)))" Label="Header"
+                          @attributes="ModalAction.FieldErrorAttributes(HeaderNameField(header))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudTextField @bind-Value="header.Value" Label="Value"
+                          InputType="@(_shownHeaders.Contains(header) ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End" AdornmentIcon="@(_shownHeaders.Contains(header) ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                          AdornmentAriaLabel="@(_shownHeaders.Contains(header) ? "Hide value" : "Show value")" OnAdornmentClick="@(() => ToggleHeaderShown(header))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mt-1"
+                           aria-label="Remove header" OnClick="@(() => RemoveHeader(header))" />
+        </div>
+    }
+
+    <MudButton id="webhook-add-header" StartIcon="@Icons.Material.Filled.Add" Class="mt-2" OnClick="AddHeader">Add Header</MudButton>
+</IntegrationModal>

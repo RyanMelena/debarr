@@ -1,0 +1,17 @@
+<div class="page-header">
+    <div class="page-header-title">
+        <MudText Typo="Typo.h4" id="page-title" Class="page-header-text">@Title</MudText>
+        @if (Subtitle is not null)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary page-header-text">@Subtitle</MudText>
+        }
+    </div>
+    @if (ChildContent is not null)
+    {
+        <div class="page-header-actions">@ChildContent</div>
+    }
+</div>
+@if (Error is not null)
+{
+    <MudAlert id="page-error" Severity="Severity.Error" Class="mb-4">@Error</MudAlert>
+}

@@ -1,0 +1,130 @@
+@page "/settings/detection"
+@inherits LiveComponentBase
+@using Debarr.Detecting
+
+<PageTitle>Detection Settings - Debarr</PageTitle>
+
+<PageHeader Title="Detection" Error="@PageAction.ErrorOf(_save, _redetectAll)">
+    <ShowAdvancedButton />
+    @if (_form.Model is not null)
+    {
+        <SaveButton id="detection-save" HasUnsavedChanges="_form.HasUnsavedChanges" Saving="_save.Running" Disabled="_redetectAll.Running" OnSave="SaveAsync" />
+    }
+</PageHeader>
+
+@if (_form.Model is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="6" Class="d-flex flex-column gap-6">
+            <PageSection Title="Queue">
+                <MudNumericField @bind-Value="_form.Model.SimultaneousDetections" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.SimultaneousDetections)))" id="detection-simultaneous-detections" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.SimultaneousDetections))" Label="Simultaneous Detections"
+                                 HelperText="Detections that run at once. Match the disks the library sits on, not the cores."
+                                 Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                @if (ShowAdvanced.Shown)
+                {
+                    <MudNumericField @bind-Value="_form.Model.TimeoutSeconds" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.TimeoutSeconds)))" id="detection-timeout" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.TimeoutSeconds))" Label="Timeout"
+                                     HelperText="Seconds one detection may take"
+                                     Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                }
+            </PageSection>
+            @if (ShowAdvanced.Shown)
+            {
+                <PageSection Title="Picture Measurement">
+                    <MudNumericField @bind-Value="_form.Model.SampleCount" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.SampleCount)))" id="detection-sample-count" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.SampleCount))" Label="Sample Count"
+                                     HelperText="Measurements across the runtime"
+                                     Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    <MudNumericField @bind-Value="_form.Model.SkipStartAndEndPercent" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.SkipStartAndEndPercent)))" id="detection-skip-start-and-end" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.SkipStartAndEndPercent))" Label="Skip Start and End"
+                                     HelperText="Percent of the runtime skipped at each end"
+                                     Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    <MudNumericField @bind-Value="_form.Model.BlackLevelSdr" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.BlackLevelSdr)))" id="detection-black-level-sdr" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.BlackLevelSdr))" Label="Black Level (SDR)"
+                                     HelperText="Levels up to this count as black, 0 to 254"
+                                     Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    <MudNumericField T="int?" @bind-Value="_form.Model.BlackLevelHdr" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.BlackLevelHdr)))" id="detection-black-level-hdr" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.BlackLevelHdr))" Label="Black Level (HDR)"
+                                     HelperText="The black level for PQ and HLG files. Empty uses the SDR black level."
+                                     Clearable="true" Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </PageSection>
+            }
+            <PageSection Title="Detector Version">
+                <Description>
+                    The version rises when an update to Debarr changes how it measures a ratio.
+                    Each result keeps being sent until Re-detect All replaces it with one from this version.
+                </Description>
+                <ChildContent>
+                    <MudText id="detection-version">Version @AspectRatioDetector.Version</MudText>
+                    <div class="d-flex flex-wrap align-center gap-2">
+                        <MudText id="detection-older-count">@OlderVersionText</MudText>
+                        <MudButton id="detection-redetect-all" Class="ms-auto" Color="Color.Error" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                                   OnClick="RedetectAllAsync" Disabled="@Busy">Re-detect All</MudButton>
+                    </div>
+                </ChildContent>
+            </PageSection>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <PageSection Title="Standard Ratios">
+                <Description>
+                    Each result is matched to the nearest standard ratio.
+                    Mark Check Picture on a ratio whose files may hold a picture of another shape, such as a 2.40 film inside a 1.78 frame.
+                    A file whose container ratio matches one of these has its picture measured, and any other container ratio is accepted as it is.
+                </Description>
+                <ChildContent>
+                    @if (_form.Model.StandardRatios.Count > 0 && !_form.Model.StandardRatios.Any(row => row.ChecksPicture))
+                    {
+                        <MudAlert id="detection-no-check-picture" Severity="Severity.Warning">
+                            No ratio is marked Check Picture, so every container ratio will be accepted without measuring the picture.
+                        </MudAlert>
+                    }
+                    @if (_form.Model.StandardRatios.Count == 0)
+                    {
+                        <MudText id="detection-standard-ratios-empty">No standard ratio yet. Add the ratios your video files come in, such as 1.78 and 2.39.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable id="detection-standard-ratios" Dense="true" Elevation="0">
+                            <thead>
+                                <tr>
+                                    <th>Ratio</th>
+                                    <th>Check Picture</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in _form.Model.StandardRatios)
+                                {
+                                    <tr>
+                                        <td class="detection-standard-ratio">@row.AspectRatio.ToAspectRatioText()</td>
+                                        <td>
+                                            <MudCheckBox T="bool" @bind-Value="row.ChecksPicture" Disabled="@Busy" Color="Color.Primary" UncheckedColor="Color.Default"
+                                                         aria-label="@($"Check Picture for {row.AspectRatio.ToAspectRatioText()}")" />
+                                        </td>
+                                        <td class="text-right">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="@Busy"
+                                                           aria-label="@($"Remove {row.AspectRatio.ToAspectRatioText()}")" OnClick="@(() => RemoveAspectRatio(_form.Model, row))" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+                    <div class="d-flex gap-2 align-start">
+                        <MudNumericField T="double?" Class="flex-grow-1" Value="@_newAspectRatio" ValueChanged="SetNewAspectRatio" id="detection-new-standard-ratio" Label="Ratio"
+                                         Min="0.01" Step="0.01" HideSpinButtons="true" InputMode="@(InputMode.@decimal)" Error="@(NewAspectRatioError is not null)" ErrorText="@NewAspectRatioError"
+                                         Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudButton id="detection-add-standard-ratio" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add"
+                                   Class="mt-2 flex-none" OnClick="@(() => AddAspectRatio(_form.Model))" Disabled="@(Busy || _newAspectRatio is not > 0)">Add Ratio</MudButton>
+                    </div>
+                    @if (ShowAdvanced.Shown)
+                    {
+                        <MudNumericField @bind-Value="_form.Model.MatchTolerance" @bind-Value:after="@(() => _save.ClearFieldError(nameof(DetectionSettingsForm.MatchTolerance)))" id="detection-match-tolerance" @attributes="_save.FieldErrorAttributes(nameof(DetectionSettingsForm.MatchTolerance))" Label="Match Tolerance" Step="0.01"
+                                         HelperText="How far a ratio may be from a standard ratio and still match it"
+                                         Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    }
+                </ChildContent>
+            </PageSection>
+        </MudItem>
+    </MudGrid>
+}

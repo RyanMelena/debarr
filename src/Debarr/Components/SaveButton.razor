@@ -1,0 +1,3 @@
+<MudButton @attributes="AdditionalAttributes" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save"
+           OnClick="OnSave" Disabled="@(Saving || Disabled || !HasUnsavedChanges)">@(Saving ? "Saving" : "Save")</MudButton>
+<NavigationLock ConfirmExternalNavigation="HasUnsavedChanges" OnBeforeInternalNavigation="ConfirmLeavingAsync" />

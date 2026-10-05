@@ -1,0 +1,370 @@
+@page "/video-file/{Hash}"
+@inherits LiveComponentBase
+
+<PageTitle>@Title - Debarr</PageTitle>
+
+@if (!_loaded)
+{
+    <PageHeader Title="Video File" />
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_videoFile is null)
+{
+    <PageHeader Title="@Title" />
+    <MudText id="video-file-missing" Class="mb-2">There is no video file at this address.</MudText>
+    <MudLink id="video-file-missing-media" Href="">Go to Media</MudLink>
+}
+else
+{
+    <div class="video-file">
+    <PageHeader Title="@Title" Subtitle="@Folder" Error="@_detectNow.Error">
+        @if (!_videoFile.Archived)
+        {
+            <DetectNowButton VideoFile="_videoFile.FileHash" HasFilePath="@(_videoFile.FilePaths.Count > 0)" OnClick="DetectNowAsync" />
+        }
+    </PageHeader>
+
+    <dl id="video-file-facts" class="video-file-facts mb-4">
+        <dt>Status</dt>
+        <dd id="video-file-status">
+            @if (_videoFile.Archived)
+            {
+                <StateLabel Class="video-file-status" Icon="@Icons.Material.Outlined.Inventory2">Archived</StateLabel>
+            }
+            else
+            {
+                <VideoFileStatusText Status="_videoFile.Status" ShowsExplanation="false" />
+            }
+            <div class="mud-text-secondary video-file-explanation">@StatusExplanation(_videoFile)</div>
+        </dd>
+        @switch (_override.Saved)
+        {
+            case { DontSend: true }:
+                <dt>Ratio</dt>
+                <dd id="video-file-ratio"><StateLabel Icon="@Icons.Material.Outlined.Block">Not sent</StateLabel></dd>
+                break;
+            case { AspectRatio: { } overrideAspectRatio }:
+                <dt>Ratio</dt>
+                <dd id="video-file-ratio">@overrideAspectRatio.ToAspectRatioText() <span class="mud-text-secondary">(override)</span></dd>
+                break;
+        }
+        @if (_videoFile.CurrentResult?.Result is { RawAspectRatio.Value: var rawAspectRatio } detectionResult)
+        {
+            <dt>@(IsManual ? "Result" : "Ratio")</dt>
+            <dd id="@(IsManual ? "video-file-detected" : "video-file-ratio")">@Snap(rawAspectRatio).Value.ToAspectRatioText() <span class="mud-text-secondary">(@rawAspectRatio.ToRawAspectRatioText() raw)</span></dd>
+            <dt>Source</dt>
+            <dd id="video-file-source">@SourceText(detectionResult)</dd>
+            <dt>Confidence</dt>
+            <dd id="video-file-confidence">
+                @detectionResult.Confidence.ToPercentText()
+                @if (ConfidenceText(detectionResult) is { Length: > 0 } confidenceText)
+                {
+                    <span class="mud-text-secondary">@($" · {confidenceText}")</span>
+                }
+            </dd>
+        }
+        <dt>Size</dt>
+        <dd>@SizeText</dd>
+        <dt>First Seen</dt>
+        <dd><DateTimeText Value="_videoFile.FirstSeenAt" /></dd>
+        <dt>File Hash</dt>
+        <dd class="video-file-copyable">
+            <span class="video-file-hash" title="@_videoFile.FileHash.Value">@_videoFile.FileHash.Value</span>
+            <CopyButton Value="@_videoFile.FileHash.Value" Label="Copy File Hash" />
+        </dd>
+    </dl>
+
+    @if (_videoFile.LastFailure is { Error: { } error } failedDetection)
+    {
+        var explanation = DetectionFailureExplanation.FromError(error, failedDetection.Path?.Value);
+        <MudAlert id="video-file-failure" Severity="@(_videoFile.CurrentResult is null ? Severity.Error : Severity.Warning)" Dense="true" Class="mb-4">
+            <div class="video-file-failure-title">
+                @(_videoFile.CurrentResult is null ? "Detection failed" : "The last detection failed, so playbacks still send the earlier result")
+                <span class="video-file-failure-time">· <DateTimeText Value="failedDetection.StartedAt" /></span>
+            </div>
+            <div id="video-file-failure-explanation">
+                @explanation.Summary @explanation.Advice
+                @if (explanation.Href is not null)
+                {
+                    <MudLink Href="@explanation.Href" Class="ml-1">@explanation.LinkText</MudLink>
+                }
+            </div>
+            @if (explanation.Detail is not null)
+            {
+                <div id="video-file-failure-detail" class="mud-text-secondary video-file-failure-detail">@explanation.Detail</div>
+            }
+        </MudAlert>
+    }
+
+    <MudGrid>
+        <MudItem xs="12" md="5">
+            @if (_override.Model is not null)
+            {
+                <PageSection id="video-file-override" Title="Override" Description="@(_videoFile.Archived ? ArchivedOverrideDescription : null)">
+                    <MudNumericField T="double?" @bind-Value="_override.Model.AspectRatio" @bind-Value:after="@(() => _saveOverride.ClearFieldError(nameof(Override.AspectRatio)))" id="video-file-override-ratio" Label="Ratio"
+                                     @attributes="_saveOverride.FieldErrorAttributes(nameof(Override.AspectRatio))"
+                                     Step="0.01" Format="0.00##" HideSpinButtons="true" InputMode="@(InputMode.@decimal)" Clearable="@(!_videoFile.Archived)" Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                     HelperText="Sent as entered in place of the detection result" Disabled="_videoFile.Archived" />
+                    <SwitchField @bind-Value="_override.Model.DontSend" id="video-file-override-suppress" Label="Don't Send"
+                                 HelperText="Send nothing when this file plays, whatever the ratio" Disabled="_videoFile.Archived" />
+                    <MudTextField T="string" @bind-Value="_override.Model.Note" id="video-file-override-note" Label="Note" Lines="2"
+                                  Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="_videoFile.Archived" />
+                    @if (_saveOverride.Error is not null)
+                    {
+                        <MudAlert id="video-file-override-error" Severity="Severity.Error" Dense="true">@_saveOverride.Error</MudAlert>
+                    }
+                    <div class="d-flex flex-wrap align-center gap-2">
+                        @if (!_videoFile.Archived)
+                        {
+                            <SaveButton id="video-file-override-save" HasUnsavedChanges="_override.HasUnsavedChanges" Saving="_saveOverride.Running" OnSave="SaveOverrideAsync" />
+                        }
+                        <MudText Typo="Typo.caption" id="video-file-override-saved" Class="mud-text-secondary">
+                            @if (_videoFile.Override?.SavedAt is { } overrideSavedAt)
+                            {
+                                <span>Saved <DateTimeText Value="overrideSavedAt" /></span>
+                            }
+                            else
+                            {
+                                <span>Never saved</span>
+                            }
+                        </MudText>
+                    </div>
+                </PageSection>
+            }
+        </MudItem>
+
+        <MudItem xs="12" md="7">
+            <PageSection Title="File Paths">
+                @if (_videoFile.FilePaths.Count == 0)
+                {
+                    <MudText id="video-file-no-paths" Class="mud-text-secondary">@NoFilePathsText(_videoFile)</MudText>
+                }
+                else
+                {
+                    <MudSimpleTable id="video-file-paths" Class="stacked-table" Dense="true" Elevation="0">
+                        <thead>
+                            <tr>
+                                <th>Path</th>
+                                <th>First Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var filePath in _videoFile.FilePaths)
+                            {
+                                <tr @key="filePath.Path.Value">
+                                    <td>
+                                        <div class="video-file-copyable">
+                                            <span class="video-file-path"><PathText Value="@filePath.Path.Value" /></span>
+                                            <CopyButton Value="@filePath.Path.Value" />
+                                        </div>
+                                        @if (RootFolderOf(filePath.Path.Value) is { } root)
+                                        {
+                                            <div class="video-file-root mud-text-secondary">
+                                                Root Folder <MudLink Href="@MediaUnder(root)" title="Show every file under this root folder in Media"><PathText Value="@root" /></MudLink>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="video-file-nowrap" data-label="First Seen"><DateTimeText Value="filePath.FirstSeenAt" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                }
+            </PageSection>
+        </MudItem>
+    </MudGrid>
+
+    <MudTabs @bind-ActivePanelIndex="_activeTab" id="video-file-tabs" MinimumTabWidth="0px" Outlined="true" Border="true" Class="mt-6" TabPanelsClass="pa-4">
+        <MudTabPanel Text="Result" ID="@("result")">
+            @if (_videoFile.CurrentResult is { } current)
+            {
+                <dl class="video-file-facts mb-3">
+                    @if (current.ContainerMetadata?.ContainerAspectRatio.Value is { } containerAspectRatio)
+                    {
+                        <dt>Container Ratio</dt>
+                        <dd>@containerAspectRatio.ToRawAspectRatioText()</dd>
+                    }
+                    @if (current.ContainerMetadata is { Width: var width, Height: var height })
+                    {
+                        <dt>Resolution</dt>
+                        <dd>@width × @height</dd>
+                    }
+                    @if (current.ContainerMetadata?.CodecName is { } codecName)
+                    {
+                        <dt>Codec</dt>
+                        <dd>@codecName</dd>
+                    }
+                    @if (current.ContainerMetadata?.ColorTransfer is { } colorTransfer)
+                    {
+                        <dt>Color Transfer</dt>
+                        <dd>@colorTransfer</dd>
+                    }
+                    <dt>Detected</dt>
+                    <dd><MudLink Href="@DetectionHref(current.Id)" OnClick="() => SelectDetection(current.Id)"><DateTimeText Value="current.StartedAt" /></MudLink></dd>
+                </dl>
+                @if (_samples.Count == 0)
+                {
+                    <MudText id="video-file-no-samples" Class="mud-text-secondary">
+                        The container ratio was accepted without measuring the picture, so there are no samples.
+                    </MudText>
+                }
+                else
+                {
+                    <MudText id="video-file-agreement" Class="mb-2">@AgreementText</MudText>
+                    <MudSimpleTable id="video-file-samples" Dense="true" Elevation="0" Class="video-file-samples">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Picture</th>
+                                <th>Ratio</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sample in _samples)
+                            {
+                                <tr class="@(_agreeingSamples.Contains(sample) ? "video-file-sample" : "video-file-sample video-file-sample-differs")">
+                                    <td>@sample.Position.ToString(@"h\:mm\:ss")</td>
+                                    @if (sample.Box is { } box)
+                                    {
+                                        <td class="video-file-nowrap">@box.Width × @box.Height</td>
+                                        <td>@box.AspectRatio.ToRawAspectRatioText()</td>
+                                    }
+                                    else
+                                    {
+                                        <td colspan="2" class="mud-text-secondary">No picture</td>
+                                    }
+                                    <td>
+                                        @if (!_agreeingSamples.Contains(sample))
+                                        {
+                                            <StateLabel Icon="@Icons.Material.Outlined.CallSplit" title="Differs from the agreeing samples">Differs</StateLabel>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                }
+            }
+            else
+            {
+                <MudText id="video-file-no-result" Class="mud-text-secondary">@NoResultText</MudText>
+            }
+        </MudTabPanel>
+        <MudTabPanel Text="@($"Detections ({_detections.Count})")" ID="@("detections")">
+            @if (_detections.Count == 0)
+            {
+                <MudText id="video-file-no-detections" Class="mud-text-secondary">No detection has finished for this file yet.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="video-file-detections" Class="stacked-table" Dense="true" Elevation="0">
+                    <thead>
+                        <tr>
+                            <th>Started</th>
+                            <th>Started By</th>
+                            <th>Result</th>
+                            <th>Duration</th>
+                            <th>Versions</th>
+                            @if (_detectionsShowPaths)
+                            {
+                                <th>Path</th>
+                            }
+                        </tr>
+                    </thead>
+                    <MotionList TableBody="true" Items="_detections" Key="detection => detection.Id" Context="entry">
+                            @{ var detection = entry.Item; }
+                            <tr id="@DetectionElementId(detection.Id)"
+                                class="video-file-detection @(detection.Id == _selectedDetectionId ? "video-file-detection-selected" : null) @entry.Class">
+                                <td class="video-file-nowrap" data-label="Started"><DateTimeText Value="detection.StartedAt" /></td>
+                                <td class="video-file-nowrap" data-label="Started By">
+                                    <MudTooltip Text="@OriginExplanation(detection.Origin)">@detection.Origin.ToDisplayText()</MudTooltip>
+                                </td>
+                                <td class="video-file-result" data-label="Result">
+                                    <div>
+                                        @if (detection.Result is { RawAspectRatio.Value: var rawAspectRatio } result)
+                                        {
+                                            <span>@Snap(rawAspectRatio).Value.ToAspectRatioText() @result.AspectRatioSource.ToDisplayText(), @result.Confidence.ToPercentText()</span>
+                                        }
+                                        else if (detection.Error is { } error)
+                                        {
+                                            var failure = DetectionFailureExplanation.FromError(error, detection.Path?.Value);
+                                            <MudTooltip Text="@failure.Detail" Disabled="@(failure.Detail is null)">
+                                                <StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@failure.Summary</StateLabel>
+                                            </MudTooltip>
+                                        }
+                                        @if (detection.Id == _videoFile.CurrentResult?.Id)
+                                        {
+                                            <MudTooltip Text="A playback of this file sends this result.">
+                                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text" Icon="@Icons.Material.Outlined.Check" Class="ml-2">Current</MudChip>
+                                            </MudTooltip>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="video-file-nowrap" data-label="Duration">@(detection.Origin == DetectionOrigin.StandardRatiosChange ? "" : detection.Duration.ToDisplayText())</td>
+                                <td data-label="Versions">
+                                    <div>
+                                        <MudTooltip Text="@DetectorExplanation(detection.DetectorVersion)">Detector&nbsp;@detection.DetectorVersion</MudTooltip>
+                                        @if (detection.FfmpegVersion is { } ffmpegVersion)
+                                        {
+                                            <div class="mud-text-secondary">ffmpeg @ffmpegVersion</div>
+                                        }
+                                    </div>
+                                </td>
+                                @if (_detectionsShowPaths)
+                            {
+                                <td class="video-file-path stacked-table-block" data-label="Path"><PathText Value="@detection.Path?.Value" /></td>
+                            }
+                            </tr>
+                    </MotionList>
+                </MudSimpleTable>
+            }
+        </MudTabPanel>
+        <MudTabPanel Text="@($"Playbacks ({_playbacks.Count})")" ID="@("playbacks")">
+            @if (_playbacks.Count == 0)
+            {
+                <MudText id="video-file-no-playbacks" Class="mud-text-secondary">No player has played this file yet.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="video-file-playbacks" Class="stacked-table" Dense="true" Elevation="0">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Player</th>
+                            <th>Title</th>
+                            @if (_playbacksShowPaths)
+                            {
+                                <th>Path</th>
+                            }
+                            <th>Sent</th>
+                        </tr>
+                    </thead>
+                    <MotionList TableBody="true" Items="_playbacks" Key="playback => playback.Id" Context="entry">
+                            @{ var playback = entry.Item; }
+                            <tr class="@entry.Class">
+                                <td class="video-file-nowrap" data-label="Time"><DateTimeText Value="playback.OccurredAt" /></td>
+                                <td data-label="Player">@playback.PlayerName</td>
+                                <td data-label="Title">@playback.Title</td>
+                                @if (_playbacksShowPaths)
+                            {
+                                <td class="video-file-path stacked-table-block" data-label="Path"><PathText Value="@playback.LocalPath?.Value" /></td>
+                            }
+                                <td data-label="Sent">
+                                    @if (playback.DetectionId is { } detectionId)
+                                    {
+                                        <MudLink Href="@DetectionHref(detectionId)" OnClick="() => SelectDetection(detectionId)"><PlaybackOutcomeText Outcome="playback.Outcome" /></MudLink>
+                                    }
+                                    else
+                                    {
+                                        <PlaybackOutcomeText Outcome="playback.Outcome" />
+                                    }
+                                </td>
+                            </tr>
+                    </MotionList>
+                </MudSimpleTable>
+            }
+        </MudTabPanel>
+    </MudTabs>
+    </div>
+}

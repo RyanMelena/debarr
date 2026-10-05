@@ -1,0 +1,135 @@
+@page "/"
+@inherits LiveComponentBase
+
+<PageTitle>Media - Debarr</PageTitle>
+
+<PageHeader Title="Media" Error="@_detectNow.Error" />
+
+@if (_counts is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_libraryIsEmpty)
+{
+    <MudText id="media-empty">
+        No video files yet. Add a root folder in <MudLink Href="settings/library">Settings &gt; Library</MudLink>, and each file a scan finds shows here.
+    </MudText>
+}
+else
+{
+    <div class="media">
+        <FilterBar Id="media" Chips="Filters.Select(filter => new FilterChip(filter.Value, filter.Label, CountOf(filter)))"
+                   SelectedFilter="@SelectedFilter.Value" SelectedFilterChanged="SelectFilter"
+                   Search="@Search" SearchChanged="SearchFor" SearchPlaceholder="Search file names and folders" />
+
+        <PagedTable TRow="MediaRow" View="_view" Id="media" ReadPage="ReadPageAsync" RowCount="CountOf(SelectedFilter)" Columns="6">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel T="MediaRow" SortLabel="@SortLabels.Path" SortDirection="_view.DirectionOf(SortLabels.Path)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Path, direction)">Path</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel T="MediaRow" SortLabel="@SortLabels.AspectRatio" SortDirection="_view.DirectionOf(SortLabels.AspectRatio)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.AspectRatio, direction)">Ratio</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTooltip Text="@ConfidenceExplanation">
+                        <MudTableSortLabel T="MediaRow" SortLabel="@SortLabels.Confidence" SortDirection="_view.DirectionOf(SortLabels.Confidence)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Confidence, direction)">Confidence</MudTableSortLabel>
+                    </MudTooltip>
+                </MudTh>
+                <MudTh><MudTableSortLabel T="MediaRow" SortLabel="@SortLabels.Status" SortDirection="_view.DirectionOf(SortLabels.Status)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Status, direction)">Status</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel T="MediaRow" SortLabel="@SortLabels.FirstSeen" SortDirection="_view.DirectionOf(SortLabels.FirstSeen)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.FirstSeen, direction)">First Seen</MudTableSortLabel></MudTh>
+                <MudTh />
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Path">
+                    @{ var filePaths = context.FilePathsByPath.ToList(); }
+                    <div class="media-paths">
+                        <div class="media-path">
+                            <div class="media-cell">
+                                <div class="media-file-name" title="@filePaths[0].Path.Value"><MudLink Href="@($"video-file/{context.FileHash}")">@FileName(filePaths[0])</MudLink></div>
+                                <div class="media-folder mud-text-secondary" title="@filePaths[0].Path.Value">@Folder(filePaths[0])</div>
+                            </div>
+                            <CopyButton Value="@filePaths[0].Path.Value" />
+                        </div>
+                        @foreach (var filePath in filePaths.Skip(1))
+                        {
+                            <div class="media-path">
+                                <div class="media-cell">
+                                    <div class="media-other-path mud-text-secondary" title="@filePath.Path.Value">@filePath.Path.Value</div>
+                                </div>
+                                <CopyButton Value="@filePath.Path.Value" />
+                            </div>
+                        }
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Ratio" Class="@(HasAspectRatio(context) ? "numeric" : "numeric media-empty")">
+                    <div class="media-cell">
+                        @if (context.Override is { DontSend: true })
+                        {
+                            <div class="media-not-sent"><StateLabel Icon="@Icons.Material.Outlined.Block">Not sent</StateLabel></div>
+                        }
+                        else if (context.Override?.AspectRatio is { } overrideAspectRatio)
+                        {
+                            <div>@overrideAspectRatio.Value.ToAspectRatioText()</div>
+                            <div class="media-override mud-text-secondary">Override</div>
+                        }
+                        else if (context.CurrentResult is { } currentResult)
+                        {
+                            <div>@Snap(currentResult.RawAspectRatio.Value).Value.ToAspectRatioText()</div>
+                            <div class="media-raw mud-text-secondary">@currentResult.RawAspectRatio.Value.ToRawAspectRatioText() raw</div>
+                        }
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Confidence" Class="@(context.Confidence is null ? "numeric media-empty" : "numeric")">@context.Confidence?.ToPercentText()</MudTd>
+                <MudTd DataLabel="Status">
+                    @{ var running = RunningDetectionOf(context); }
+                    <div class="media-cell">
+                        <div class="@(running is null ? null : "media-detecting")">
+                            <VideoFileStatusText Status="context.Status" Running="running" />
+                            @if (running is not null)
+                            {
+                                <span class="mud-text-secondary numeric"> · <ElapsedTime Since="running.StartedAt" /></span>
+                            }
+                        </div>
+                        @if (running is null && context.LastFailure is { } lastFailure)
+                        {
+                            var failure = DetectionFailureExplanation.FromError(lastFailure.Error, context.FilePaths[0].Path.Value);
+                            <div class="media-error mud-text-secondary" title="@failure.ToTooltipText()">@failure.Summary</div>
+                        }
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="First Seen" Class="media-first-seen">
+                    <DateTimeText Value="context.FirstSeenAt" />
+                </MudTd>
+                <MudTd Class="media-action">
+                    @* Each control stays the same element while its detection runs, so it keeps focus. *@
+                    @{ var running = RunningDetectionOf(context); }
+                    <MudTooltip Text="@DetectNowTooltip(running)">
+                        <MudIconButton Class="media-detect-icon" Icon="@(running is null ? Icons.Material.Outlined.CenterFocusStrong : null)" Size="Size.Small"
+                                       aria-label="@DetectNowLabel(running)" aria-disabled="@(running is null ? null : "true")"
+                                       Disabled="@(running is null && DetectNowRunning)" OnClick="() => DetectNowAsync(context)">
+                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Info" />
+                        </MudIconButton>
+                    </MudTooltip>
+                    <div class="media-detect-button">
+                        <MudButton Variant="Variant.Outlined" Color="@(running is null ? Color.Primary : Color.Info)" Size="Size.Small"
+                                   StartIcon="@(running is null ? Icons.Material.Outlined.CenterFocusStrong : null)" aria-disabled="@(running is null ? null : "true")" aria-label="@DetectNowLabel(running)"
+                                   Disabled="@(running is null && DetectNowRunning)" OnClick="() => DetectNowAsync(context)">
+                            @if (running is not null)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Info" Class="mr-2" />
+                                @("Detecting")
+                            }
+                            else if (DetectNowRunning)
+                            {
+                                <span class="media-detect-busy">Detect Now Busy</span>
+                            }
+                            else
+                            {
+                                @("Detect Now")
+                            }
+                        </MudButton>
+                    </div>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText id="media-no-match">No video files match.</MudText>
+            </NoRecordsContent>
+        </PagedTable>
+    </div>
+}

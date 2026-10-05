@@ -1,0 +1,18 @@
+/* The filters sit at the left, and what follows them at the right. */
+.filter-bar ::deep .filter-bar-filters {
+    margin-right: auto;
+}
+
+.filter-bar-count {
+    margin-left: 0.4em;
+}
+
+.filter-bar ::deep .filter-bar-search {
+    min-width: 18rem;
+}
+
+@media (max-width: 600px) {
+    .filter-bar ::deep .filter-bar-search {
+        min-width: 100%;
+    }
+}

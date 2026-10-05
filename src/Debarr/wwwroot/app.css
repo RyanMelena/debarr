@@ -1,0 +1,257 @@
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("fonts/inter-latin-wght-normal.woff2") format("woff2");
+}
+
+h1:focus {
+    outline: none;
+}
+
+/* Figures take equal widths, so ratios, confidences and times line up in columns.
+   Only numbers take them, since Inter widens its hyphen too. */
+.numeric,
+.date-time {
+    font-variant-numeric: tabular-nums;
+}
+
+/* The app bar is charcoal in both themes, and a line keeps it apart from the dark page. */
+.mud-appbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* A link reads as text with an amber underline, so amber on its own always means an action or the current page.
+   MudBlazor sets a colour class's colour as important, so this one is too. */
+.mud-link.mud-primary-text {
+    color: var(--mud-palette-text-primary) !important;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--mud-palette-primary) 55%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+    .mud-link.mud-primary-text:hover {
+        text-decoration-color: var(--mud-palette-primary);
+        text-decoration-thickness: 2px;
+    }
+
+.blazor-error-boundary {
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    padding: 1rem 1rem 1rem 3.7rem;
+    color: white;
+}
+
+    .blazor-error-boundary::after {
+        content: "An error has occurred."
+    }
+
+/* A card's label sits level with the first line of its value. */
+.mud-xs-table .mud-table-cell,
+.mud-sm-table .mud-table-cell {
+    align-items: baseline;
+}
+
+/* Between phone and desktop width a card is wide, so each value follows its label in a column of labels rather than sitting at the card's far edge. */
+@media (min-width: 600px) and (max-width: 960px) {
+    .mud-sm-table .mud-table-cell {
+        justify-content: flex-start;
+    }
+
+    .mud-sm-table .mud-table-cell::before {
+        flex: 0 0 10rem;
+        margin-right: 0;
+    }
+}
+
+/* Every table pager keeps its first and last page buttons where the table shows cards, as it has on the desktop. */
+.mud-xs-table .mud-table-pagination .mud-table-pagination-actions .mud-button-root:first-child,
+.mud-xs-table .mud-table-pagination .mud-table-pagination-actions .mud-button-root:last-child,
+.mud-sm-table .mud-table-pagination .mud-table-pagination-actions .mud-button-root:first-child,
+.mud-sm-table .mud-table-pagination .mud-table-pagination-actions .mud-button-root:last-child {
+    display: inline-flex;
+}
+
+.mud-xs-table .mud-table-pagination .mud-table-pagination-toolbar,
+.mud-sm-table .mud-table-pagination .mud-table-pagination-toolbar {
+    flex-wrap: wrap;
+    height: auto;
+}
+
+/* A value an environment variable sets has a dashed, shaded box, muted text and a lock, so it reads as fixed rather than editable. */
+.set-by-variable .mud-input.mud-input-outlined .mud-input-outlined-border {
+    border-style: dashed;
+}
+
+.set-by-variable .mud-input.mud-input-outlined {
+    background-color: color-mix(in srgb, var(--mud-palette-text-primary) 6%, transparent);
+}
+
+.set-by-variable .mud-input > input {
+    color: var(--mud-palette-text-secondary);
+}
+
+/*
+ * A server-paged table's loading bar overlays the header's lower edge, so the rows never move while a page reads.
+ * It shows only once a read has run for 400 ms, so a live reload, which takes far less, shows nothing.
+ */
+.mud-table .mud-table-loading-row > td {
+    position: relative;
+    height: 0;
+    padding: 0;
+    border: 0;
+}
+
+.mud-table .mud-table-loading-row .mud-table-loading-progress {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    animation: table-loading-delay 0s linear 400ms both;
+}
+
+@keyframes table-loading-delay {
+    from {
+        visibility: hidden;
+    }
+
+    to {
+        visibility: visible;
+    }
+}
+
+/*
+ * Below 600 px a stacked table lays each row out as a card, as MudTable does.
+ * A cell with a data-label sets its value beside the label, or beneath it with stacked-table-block for a long value,
+ * a cell without one, such as a path, spans the card, the stacked-table-actions cell sits in the card's top right corner,
+ * and an empty cell is left out. A row with the stacked-table-continuation class joins the card above it.
+ */
+@media (max-width: 599.98px) {
+    .mud-simple-table.stacked-table table thead,
+    .mud-simple-table.stacked-table table colgroup {
+        display: none;
+    }
+
+    .mud-simple-table.stacked-table table tbody,
+    .mud-simple-table.stacked-table table * tr {
+        display: block;
+    }
+
+    .mud-simple-table.stacked-table table * tr {
+        padding: 6px 0;
+        border-top: 1px solid var(--mud-palette-table-lines);
+    }
+
+    .mud-simple-table.stacked-table table tbody > tr:first-child,
+    .mud-simple-table.stacked-table table * tr.stacked-table-continuation {
+        border-top: none;
+    }
+
+    .mud-simple-table.stacked-table table * tr.stacked-table-continuation {
+        padding-top: 0;
+        margin-top: -6px;
+    }
+
+    .mud-simple-table.stacked-table table * tr > td {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 32px;
+        padding: 2px 16px;
+        border-bottom: none;
+        text-align: end;
+    }
+
+        .mud-simple-table.stacked-table table * tr > td::before {
+            content: attr(data-label);
+            flex: none;
+            font-weight: 500;
+            text-align: start;
+        }
+
+        .mud-simple-table.stacked-table table * tr > td:not([data-label]) {
+            display: block;
+            min-height: 0;
+            text-align: start;
+        }
+
+        .mud-simple-table.stacked-table table * tr > td.stacked-table-block {
+            display: block;
+            text-align: start;
+        }
+
+            .mud-simple-table.stacked-table table * tr > td.stacked-table-block::before {
+                display: block;
+            }
+
+        .mud-simple-table.stacked-table table * tr > td.stacked-table-actions {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            padding: 0;
+        }
+
+        /* A log file's download button sits level with the button that names the file. */
+        #log-files.stacked-table table * tr > td.stacked-table-actions {
+            top: 13px;
+        }
+
+        .mud-simple-table.stacked-table table * tr:has(> td.stacked-table-actions) {
+            position: relative;
+        }
+
+            .mud-simple-table.stacked-table table * tr:has(> td.stacked-table-actions) > td:first-child {
+                padding-right: 56px;
+            }
+
+        .mud-simple-table.stacked-table table * tr > td:empty {
+            display: none;
+        }
+}
+
+/* A modal's footer wraps its buttons onto a second line on a phone, each button on one line. */
+.mud-dialog .mud-dialog-actions {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+    .mud-dialog .mud-dialog-actions .mud-button-root {
+        white-space: nowrap;
+    }
+
+/* The app bar's running work summary sits at its right edge, and shrinks to the room the title leaves. */
+.mud-appbar .running-work-summary {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-left: auto;
+}
+
+    .mud-appbar .running-work-summary .mud-button-label {
+        min-width: 0;
+    }
+
+.mud-appbar .app-bar-brand {
+    flex: none;
+    margin-right: 8px;
+}
+
+/*
+ * Focus from the keyboard shows as an amber ring on every control.
+ * A switch or a checkbox rings the box around its hidden input, and a navigation item rings inside the drawer's edge.
+ */
+a:focus-visible,
+summary:focus-visible,
+.mud-button-root:focus-visible,
+.mud-chip:focus-visible,
+.mud-tab:focus-visible,
+.mud-button-root:has(input:focus-visible) {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.mud-nav-link:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}

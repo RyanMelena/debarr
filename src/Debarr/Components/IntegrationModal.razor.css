@@ -1,0 +1,11 @@
+.integration-modal-fields {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Show Advanced and Test sit at the left, and Remove, Cancel and Save at the right, on a line of their own when the footer wraps on a phone. */
+.integration-modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}

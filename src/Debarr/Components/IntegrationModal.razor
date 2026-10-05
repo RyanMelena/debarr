@@ -1,0 +1,32 @@
+<MudDialog ActionsClass="justify-start">
+    <DialogContent>
+        <div class="integration-modal-fields">
+            @ChildContent
+        </div>
+
+        @if (Modal.ModalAction.Error is not null)
+        {
+            <MudAlert id="@($"{IdPrefix}-error")" Severity="Severity.Error" Dense="true" Class="mt-3">@Modal.ModalAction.Error</MudAlert>
+        }
+
+        @if (Modal.TestResult is not null)
+        {
+            <MudAlert id="@($"{IdPrefix}-test-result")" Severity="@(Modal.TestSucceeded ? Severity.Success : Severity.Error)" Dense="true" Class="mt-3">@Modal.TestResult</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (Modal.AdvancedFields.Count > 0)
+        {
+            <ShowAdvancedButton />
+        }
+        <MudButton id="@($"{IdPrefix}-test")" StartIcon="@Icons.Material.Filled.NetworkCheck" OnClick="Modal.TestAsync" Disabled="@Modal.ModalAction.Running">Test</MudButton>
+        <div class="integration-modal-actions">
+            @if (Removable)
+            {
+                <MudButton id="@($"{IdPrefix}-remove")" Color="Color.Error" OnClick="Modal.RemoveAsync" Disabled="@Modal.ModalAction.Running">Remove</MudButton>
+            }
+            <MudButton id="@($"{IdPrefix}-cancel")" OnClick="Modal.Cancel" Disabled="@Modal.ModalAction.Running">Cancel</MudButton>
+            <MudButton id="@($"{IdPrefix}-save")" Color="Color.Primary" Variant="Variant.Filled" OnClick="Modal.SaveAsync" Disabled="@Modal.ModalAction.Running">Save</MudButton>
+        </div>
+    </DialogActions>
+</MudDialog>

@@ -1,0 +1,61 @@
+@page "/settings/ui"
+@inherits LiveComponentBase
+
+<PageTitle>UI Settings - Debarr</PageTitle>
+
+<PageHeader Title="UI" Error="@_save.Error">
+    @if (_form.Model is not null)
+    {
+        <SaveButton id="ui-save" HasUnsavedChanges="_form.HasUnsavedChanges" Saving="_save.Running" OnSave="SaveAsync" />
+    }
+</PageHeader>
+
+@if (_form.Model is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <PageSection Title="Dates">
+                <MudSelect T="string" @bind-Value="_form.Model.ShortDateFormat" id="ui-short-date-format" Label="Short Date Format"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var format in DateTimeFormats.ShortDateFormats)
+                    {
+                        <MudSelectItem Value="@format">@Example(format)</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect T="string" @bind-Value="_form.Model.LongDateFormat" id="ui-long-date-format" Label="Long Date Format"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var format in DateTimeFormats.LongDateFormats)
+                    {
+                        <MudSelectItem Value="@format">@Example(format)</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect T="string" @bind-Value="_form.Model.TimeFormat" id="ui-time-format" Label="Time Format"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var format in DateTimeFormats.TimeFormats)
+                    {
+                        <MudSelectItem Value="@format">@Example(format)</MudSelectItem>
+                    }
+                </MudSelect>
+                <SwitchField @bind-Value="_form.Model.ShowRelativeDates" id="ui-show-relative-dates" Label="Show Relative Dates"
+                             HelperText="Show Today, Yesterday and the weekday for the past week, and leave out the current year" />
+            </PageSection>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <PageSection Title="Style">
+                <MudSelect T="UITheme" @bind-Value="_form.Model.Theme" id="ui-theme" Label="Theme"
+                           HelperText="Auto follows the browser's light or dark preference"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var theme in Enum.GetValues<UITheme>())
+                    {
+                        <MudSelectItem Value="@theme">@theme</MudSelectItem>
+                    }
+                </MudSelect>
+            </PageSection>
+        </MudItem>
+    </MudGrid>
+}

@@ -1,0 +1,13 @@
+@using Debarr.Extensions
+@switch (Delivery.Outcome)
+{
+    case DeliveryOutcome.Succeeded:
+        <StateLabel Class="delivery-outcome" Icon="@Icons.Material.Outlined.CheckCircle" Color="Color.Success">Delivered in @Delivery.Duration.ToDisplayText()</StateLabel>
+        break;
+    case DeliveryOutcome.Failed failed:
+        <StateLabel Class="delivery-outcome" Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">Failed: @failed.Error</StateLabel>
+        break;
+    case DeliveryOutcome.Cancelled:
+        <StateLabel Class="delivery-outcome" Icon="@Icons.Material.Outlined.Cancel">Cancelled by a newer playback</StateLabel>
+        break;
+}

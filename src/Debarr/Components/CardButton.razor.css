@@ -1,0 +1,24 @@
+/* A column from the top, since a button centres its content in the height a grid row stretches it to. */
+.card-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    background-color: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+    .card-button:hover {
+        background-color: var(--mud-palette-table-hover);
+    }
+
+    .card-button:focus-visible {
+        outline: 2px solid var(--mud-palette-primary);
+        outline-offset: 2px;
+    }

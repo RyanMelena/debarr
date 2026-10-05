@@ -1,0 +1,20 @@
+@typeparam TItem
+
+@if (TableBody)
+{
+    <tbody class="motion-list @Class" @attributes="AdditionalAttributes">
+        @foreach (var entry in _entries)
+        {
+            <MotionListItem @key="entry.Key" ChildContent="ChildContent?.Invoke(entry)" />
+        }
+    </tbody>
+}
+else
+{
+    <div class="motion-list @Class" @attributes="AdditionalAttributes">
+        @foreach (var entry in _entries)
+        {
+            <MotionListItem @key="entry.Key" ChildContent="ChildContent?.Invoke(entry)" />
+        }
+    </div>
+}

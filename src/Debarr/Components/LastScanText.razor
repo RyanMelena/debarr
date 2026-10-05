@@ -1,0 +1,18 @@
+@switch (Scan)
+{
+    case null:
+        <span class="last-scan">Never</span>
+        break;
+    case (var at, LibraryScanOutcome.Failed):
+        <StateLabel Class="last-scan" Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">Failed <DateTimeText Value="at" /></StateLabel>
+        break;
+    case (var at, LibraryScanOutcome.Cancelled):
+        <StateLabel Class="last-scan" Icon="@Icons.Material.Outlined.Cancel">Cancelled <DateTimeText Value="at" /></StateLabel>
+        break;
+    case (var at, LibraryScanOutcome.Interrupted):
+        <StateLabel Class="last-scan" Icon="@Icons.Material.Outlined.PowerOff">Interrupted <DateTimeText Value="at" /></StateLabel>
+        break;
+    case (var at, _):
+        <span class="last-scan"><DateTimeText Value="at" /></span>
+        break;
+}

@@ -1,0 +1,66 @@
+@inherits IntegrationModalBase
+
+<IntegrationModal Modal="this" IdPrefix="kodi" Removable="!Form.IsNew">
+    @if (ConnectionState is { } connectionState)
+    {
+        <MudAlert id="kodi-connection" Severity="PlayerConnectionStateText.SeverityOf(connectionState)" NoIcon="true" Dense="true" Class="mb-3">
+            <PlayerConnectionStateText State="connectionState" />
+        </MudAlert>
+    }
+    <MudGrid>
+        <MudItem xs="12">
+            <SwitchField @bind-Value="Form.Enabled" id="kodi-enabled" Label="Enable" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="Form.Name" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Name)))" id="kodi-name" Label="Name"
+                          @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Name))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="8">
+            <MudTextField @bind-Value="Form.Host" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Host)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Host))" id="kodi-host" Label="Host"
+                          HelperText="Such as kodi.lan or 192.168.1.20" Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField @bind-Value="Form.Port" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.Port)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.Port))" id="kodi-port" Label="Port"
+                             Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        @if (ShowAdvanced.Shown)
+        {
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="Form.PingIntervalSeconds" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.PingIntervalSeconds)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.PingIntervalSeconds))" id="kodi-ping-interval"
+                                 Label="Ping Interval" HelperText="Seconds between pings"
+                                 Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="Form.RequestTimeoutSeconds" @bind-Value:after="@(() => ModalAction.ClearFieldError(nameof(Form.RequestTimeoutSeconds)))" @attributes="ModalAction.FieldErrorAttributes(nameof(Form.RequestTimeoutSeconds))" id="kodi-request-timeout"
+                                 Label="Request Timeout" HelperText="Seconds one request may take"
+                                 Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        }
+    </MudGrid>
+
+    <MudText Typo="Typo.subtitle2" Class="mt-5">Path Mappings</MudText>
+    <div>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">
+            A path the player reports that starts with a player path, such as smb://nas/media, has that part replaced with its local path, such as /media.
+            The longest match wins.
+        </MudText>
+    </div>
+
+    @foreach (var pathMapping in Form.PathMappings)
+    {
+        <div class="d-flex align-start gap-2 mt-2" @key="pathMapping">
+            <MudTextField @bind-Value="pathMapping.PlayerPath" @bind-Value:after="@(() => ModalAction.ClearFieldError(PathMappingField(pathMapping, nameof(PathMappingForm.PlayerPath))))" Label="Player Path"
+                          @attributes="ModalAction.FieldErrorAttributes(PathMappingField(pathMapping, nameof(PathMappingForm.PlayerPath)))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="mt-3" />
+            <MudTextField @bind-Value="pathMapping.LocalPath" @bind-Value:after="@(() => ModalAction.ClearFieldError(PathMappingField(pathMapping, nameof(PathMappingForm.LocalPath))))" Label="Local Path"
+                          @attributes="ModalAction.FieldErrorAttributes(PathMappingField(pathMapping, nameof(PathMappingForm.LocalPath)))"
+                          Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mt-1"
+                           aria-label="Remove path mapping" OnClick="@(() => RemovePathMapping(pathMapping))" />
+        </div>
+    }
+
+    <MudButton id="kodi-add-path-mapping" StartIcon="@Icons.Material.Filled.Add" Class="mt-2" OnClick="AddPathMapping">Add Path Mapping</MudButton>
+</IntegrationModal>

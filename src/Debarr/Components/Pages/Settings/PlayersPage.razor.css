@@ -1,0 +1,8 @@
+/* A long error keeps the cards level; the edit modal shows it in full. */
+::deep .player-card-error {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}

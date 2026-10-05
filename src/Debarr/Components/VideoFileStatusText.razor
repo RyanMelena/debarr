@@ -1,0 +1,10 @@
+@if (ShowsExplanation)
+{
+    <MudTooltip Text="@Explanation">
+        <StateLabel Class="video-file-status" Icon="@Display.Icon" Color="@Display.Color">@Display.Text</StateLabel>
+    </MudTooltip>
+}
+else
+{
+    <StateLabel Class="video-file-status" Icon="@Display.Icon" Color="@Display.Color">@Display.Text</StateLabel>
+}

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <NoDefaultLaunchSettingsFile>True</NoDefaultLaunchSettingsFile>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CliWrap" />
+    <PackageReference Include="Fisher" />
+    <PackageReference Include="FluentResults" />
+    <PackageReference Include="MQTTnet" />
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="Quartz" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="StreamJsonRpc" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="WolverineFx.Fisher" />
+  </ItemGroup>
+
+  <!-- Every append states the version of the facts its decision read. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="BannedSymbols.txt" />
+  </ItemGroup>
+
+  <!-- Release builds run the pre-generated handlers, so only Debug carries the runtime compiler. -->
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="WolverineFx.RuntimeCompilation" />
+  </ItemGroup>
+
+</Project>

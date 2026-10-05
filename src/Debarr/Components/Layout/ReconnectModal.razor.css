@@ -1,0 +1,177 @@
+/* Each element shows only in the states its classes name; Blazor sets the state on the dialog. */
+.components-reconnect-first-attempt-visible,
+.components-reconnect-repeated-attempt-visible,
+.components-reconnect-failed-visible,
+.components-pause-visible,
+.components-resume-failed-visible,
+.components-rejoining-animation {
+    display: none;
+}
+
+#components-reconnect-modal.components-reconnect-show .components-reconnect-first-attempt-visible,
+#components-reconnect-modal.components-reconnect-show .components-rejoining-animation,
+#components-reconnect-modal.components-reconnect-paused .components-pause-visible,
+#components-reconnect-modal.components-reconnect-resume-failed .components-resume-failed-visible,
+#components-reconnect-modal.components-reconnect-retrying .components-reconnect-repeated-attempt-visible,
+#components-reconnect-modal.components-reconnect-retrying .components-rejoining-animation,
+#components-reconnect-modal.components-reconnect-failed .components-reconnect-failed-visible {
+    display: block;
+}
+
+/* Blazor adds the retrying class beside the first attempt's, so the later state's text replaces the first attempt's. */
+#components-reconnect-modal.components-reconnect-retrying .components-reconnect-first-attempt-visible,
+#components-reconnect-modal.components-reconnect-failed .components-reconnect-first-attempt-visible,
+#components-reconnect-modal.components-reconnect-paused .components-reconnect-first-attempt-visible,
+#components-reconnect-modal.components-reconnect-resume-failed .components-reconnect-first-attempt-visible {
+    display: none;
+}
+
+/* MudBlazor styles this modal as well, with !important on its background and on its buttons' margin, so these rules override it. */
+#components-reconnect-modal {
+    background: var(--mud-palette-surface, #fff) !important;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: var(--mud-elevation-24, 0 11px 15px -7px rgba(0, 0, 0, 0.2));
+    color: var(--mud-palette-text-primary, rgba(0, 0, 0, 0.87));
+    font-family: var(--mud-typography-default-family, inherit);
+    margin: 20vh auto;
+    max-width: calc(100vw - 32px);
+    opacity: 0;
+    padding: 24px;
+    width: 400px;
+    transition: display 0.2s allow-discrete, overlay 0.2s allow-discrete;
+    animation: components-reconnect-modal-fade-out 0.2s both;
+}
+
+    /* With no control to focus, as while it retries, the dialog itself takes focus, and needs no ring of its own. */
+    #components-reconnect-modal:focus-visible {
+        outline: none;
+    }
+
+    /* It waits 300 ms before it shows, so a connection that returns at once shows nothing. */
+    #components-reconnect-modal[open] {
+        animation: components-reconnect-modal-enter 0.2s ease-out 0.3s both;
+    }
+
+    #components-reconnect-modal::backdrop {
+        background-color: var(--mud-palette-overlay-dark, rgba(33, 33, 33, 0.5));
+        animation: components-reconnect-modal-fade-in 0.2s ease-out 0.3s both;
+    }
+
+@keyframes components-reconnect-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes components-reconnect-modal-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes components-reconnect-modal-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.components-reconnect-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.components-reconnect-title {
+    font-size: var(--mud-typography-h6-size, 1.25rem);
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+}
+
+#components-reconnect-modal p {
+    color: var(--mud-palette-text-secondary, rgba(0, 0, 0, 0.6));
+    line-height: 1.5;
+    margin: 0;
+}
+
+.components-reconnect-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+#components-reconnect-modal button {
+    background: var(--mud-palette-primary, #594ae2);
+    border: 0;
+    border-radius: 4px;
+    color: var(--mud-palette-primary-text, #fff);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.75;
+    margin: 0 !important;
+    min-width: 0;
+    padding: 6px 16px;
+    text-transform: none;
+}
+
+    #components-reconnect-modal button.components-reconnect-secondary {
+        background: transparent;
+        color: var(--mud-palette-text-primary, rgba(0, 0, 0, 0.87));
+    }
+
+    #components-reconnect-modal button:hover {
+        filter: brightness(1.08);
+    }
+
+    #components-reconnect-modal button:focus-visible {
+        outline: 2px solid var(--mud-palette-primary, #594ae2);
+        outline-offset: 2px;
+    }
+
+/* A spinner in the colour of a connection that is connecting. */
+.components-rejoining-animation {
+    animation: components-rejoining-spin 0.9s linear infinite;
+    border: 3px solid var(--mud-palette-info, #2196f3);
+    border-radius: 50%;
+    border-top-color: transparent;
+    height: 32px;
+    width: 32px;
+}
+
+@keyframes components-rejoining-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #components-reconnect-modal,
+    #components-reconnect-modal[open],
+    #components-reconnect-modal::backdrop {
+        animation: none;
+        opacity: 1;
+        transition: none;
+    }
+
+    .components-rejoining-animation {
+        animation: none;
+        border-top-color: var(--mud-palette-info, #2196f3);
+    }
+}

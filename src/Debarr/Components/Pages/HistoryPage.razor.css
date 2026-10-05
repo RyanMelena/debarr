@@ -1,0 +1,69 @@
+.history ::deep .history-path {
+    min-width: 14rem;
+}
+
+/* A reason why nothing was sent reads on two lines. */
+.history ::deep .history-sent {
+    min-width: 11rem;
+}
+
+.history ::deep .history-deliveries {
+    min-width: 18rem;
+}
+
+.history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-path-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.history-player {
+    width: 12rem;
+}
+
+.history ::deep .history-nowrap {
+    white-space: nowrap;
+}
+
+/* The table lays each row out as a card up to 960 px, with the value beside its label. */
+@media (max-width: 960px) {
+    .history ::deep .mud-table-cell > * {
+        min-width: 0;
+    }
+
+    .history ::deep .history-sent,
+    .history ::deep .history-deliveries {
+        min-width: 0;
+    }
+
+    /* A playback that sent nothing has no deliveries, so its card leaves the row out and ends at Sent. */
+    .history ::deep .history-no-deliveries {
+        display: none;
+    }
+
+    .history ::deep .mud-table-row:has(.history-no-deliveries) .history-sent {
+        border-bottom: 1px solid var(--mud-palette-table-lines);
+    }
+
+    .history ::deep .history-path {
+        min-width: 0;
+    }
+
+    .history ::deep .history-nowrap {
+        white-space: normal;
+    }
+}
+
+/* On a phone the player select takes its own row. */
+@media (max-width: 600px) {
+    .history-player {
+        width: 100%;
+        min-width: 100%;
+    }
+}

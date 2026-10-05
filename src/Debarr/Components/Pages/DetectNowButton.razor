@@ -1,0 +1,15 @@
+@inherits LiveComponentBase
+
+@if (IsRunning)
+{
+    <MudButton id="video-file-detect-now" Variant="Variant.Outlined" Disabled="true">
+        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Detecting
+    </MudButton>
+}
+else
+{
+    <MudTooltip Text="@UnavailableReason" Disabled="@(UnavailableReason is null)">
+        <MudButton id="video-file-detect-now" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.CenterFocusStrong"
+                   Disabled="@(UnavailableReason is not null)" OnClick="DetectNowAsync">Detect Now</MudButton>
+    </MudTooltip>
+}

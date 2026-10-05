@@ -1,0 +1,6 @@
+@media (prefers-reduced-motion: reduce) {
+    .table-skeleton-row ::deep .mud-skeleton,
+    .table-skeleton-row ::deep .mud-skeleton::after {
+        animation: none;
+    }
+}

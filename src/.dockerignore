@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+TestResults/
+Debarr.Tests/
+*.db
+*.db-shm
+*.db-wal
+**/.vs/
+**/*.user

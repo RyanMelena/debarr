@@ -1,0 +1,10 @@
+@inherits LiveComponentBase
+
+@if (_formatter is not null)
+{
+    <CascadingValue Value="_theme">
+        <CascadingValue Value="_formatter">
+            @ChildContent
+        </CascadingValue>
+    </CascadingValue>
+}

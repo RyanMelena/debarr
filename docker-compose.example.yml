@@ -1,0 +1,16 @@
+services:
+  debarr:
+    image: ghcr.io/ryanmelena/debarr:latest
+    # Build from a checkout instead of pulling the published image.
+    # build:
+    #   context: ./src
+    restart: unless-stopped
+    read_only: true
+    user: "1000:1000"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+      # Add /movies and /tv as root folders, and map each player's paths to them.
+      - /mnt/media/movies:/movies:ro
+      - /mnt/media/tv:/tv:ro

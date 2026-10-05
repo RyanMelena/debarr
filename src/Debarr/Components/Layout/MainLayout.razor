@@ -1,0 +1,82 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="_themeProvider" Theme="DebarrTheme.Theme" IsDarkMode="IsDarkMode" />
+<CascadingValue Value="_showAdvanced">
+<MudPopoverProvider />
+<MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" DefaultFocus="DefaultFocus.FirstChild" />
+
+<MudLayout>
+    <MudAppBar Dense="true" Elevation="0">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                       aria-label="Toggle navigation" OnClick="ToggleDrawer" />
+        <a href="" class="app-bar-brand"><Logo />Debarr</a>
+        @if (!_drawerOpen)
+        {
+            <RunningWork Compact="true" OnClick="OpenDrawer" />
+        }
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always" Elevation="0">
+        <div class="drawer-content">
+            <MudNavMenu>
+                <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Movie">Media</MudNavLink>
+                <MudNavLink Href="history" Icon="@Icons.Material.Outlined.History">History</MudNavLink>
+                <MudNavGroup Title="Settings" Icon="@Icons.Material.Outlined.Settings" Expanded="true">
+                    <MudNavLink Href="settings/library" Icon="@Icons.Material.Outlined.VideoLibrary">Library</MudNavLink>
+                    <MudNavLink Href="settings/detection" Icon="@Icons.Material.Outlined.AspectRatio">Detection</MudNavLink>
+                    <MudNavLink Href="settings/players" Icon="@Icons.Material.Outlined.Cast">Players</MudNavLink>
+                    <MudNavLink Href="settings/notifiers" Icon="@Icons.Material.Outlined.NotificationsActive">Notifiers</MudNavLink>
+                    <MudNavLink Href="settings/general" Icon="@Icons.Material.Outlined.Tune">General</MudNavLink>
+                    <MudNavLink Href="settings/ui" Icon="@Icons.Material.Outlined.Palette">UI</MudNavLink>
+                </MudNavGroup>
+                <MudNavGroup Title="System" Icon="@Icons.Material.Outlined.Storage" Expanded="true">
+                    <TitleContent>
+                        <span class="nav-group-title">System<HealthBadge /></span>
+                    </TitleContent>
+                    <ChildContent>
+                        <MudNavLink Href="system/status" Icon="@Icons.Material.Outlined.MonitorHeart">Status</MudNavLink>
+                        <MudNavLink Href="system/tasks" Icon="@Icons.Material.Outlined.Schedule">Tasks</MudNavLink>
+                        <MudNavLink Href="system/logs" Icon="@Icons.Material.Outlined.Description">Logs</MudNavLink>
+                    </ChildContent>
+                </MudNavGroup>
+            </MudNavMenu>
+            <div class="drawer-activity">
+                <RunningWork />
+                <ActivityMessageArea />
+            </div>
+        </div>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="pa-4">
+            <ErrorBoundary @ref="_errorBoundary">
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="exception">
+                    <PageTitle>Error - Debarr</PageTitle>
+                    <PageHeader Title="Something Went Wrong" />
+                    <MudAlert id="page-failure" Severity="Severity.Error" Class="mb-4">
+                        <div>This page stopped working: @exception.Message</div>
+                        <div class="mud-text-secondary">Try again, or open another page. System &gt; Logs has the details.</div>
+                    </MudAlert>
+                    <div class="d-flex flex-wrap gap-2">
+                        <MudButton id="page-failure-retry" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
+                                   OnClick="Recover">Try Again</MudButton>
+                        <MudButton Href="system/logs" Variant="Variant.Text">Open System &gt; Logs</MudButton>
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+</CascadingValue>
+
+<div id="blazor-error-ui" data-nosnippet role="alert">
+    <div class="blazor-error-ui-content">
+        <MudIcon Icon="@Icons.Material.Outlined.ErrorOutline" Size="Size.Small" />
+        <span class="blazor-error-ui-text">This page stopped working after an error. Reload it to carry on.</span>
+        <button type="button" class="reload">Reload</button>
+        <button type="button" class="dismiss" aria-label="Dismiss"><MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" /></button>
+    </div>
+</div>

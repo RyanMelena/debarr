@@ -1,0 +1,61 @@
+@page "/settings/general"
+@inherits LiveComponentBase
+
+<PageTitle>General Settings - Debarr</PageTitle>
+
+<PageHeader Title="General" Error="@_save.Error">
+    @if (_form.Model is not null)
+    {
+        <SaveButton id="general-save" HasUnsavedChanges="_form.HasUnsavedChanges" Saving="_save.Running" OnSave="SaveAsync" />
+    }
+</PageHeader>
+
+@if (_form.Model is null || _form.Saved is null || _running is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudText id="general-restart-help" Class="mud-text-secondary mb-4">Debarr reads these settings when it starts, so a change takes effect after a restart.</MudText>
+
+    @if (_form.Saved.GetChanges(_running).Count > 0)
+    {
+        <MudAlert id="general-restart-notice" Severity="Severity.Info" Class="mb-4">
+            Saved to @hostSettingsFile.Path. Restart Debarr to apply these values.
+        </MudAlert>
+    }
+
+    <MudForm @ref="_mudForm" Model="@_form.Model">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <PageSection Title="Server">
+                    <HostSettingField @bind-Value="_form.Model.BindAddress" Key="@GeneralSettingsForm.BindAddressKey" id="general-bind-address" Label="Bind Address"
+                                      Help="The address Debarr listens on. * listens on every address." />
+                    <HostSettingField @bind-Value="_form.Model.Port" Key="@GeneralSettingsForm.PortKey" id="general-port" Label="Port Number" InputType="InputType.Number" />
+                    <HostSettingField @bind-Value="_form.Model.UrlBase" Key="@GeneralSettingsForm.UrlBaseKey" id="general-url-base" Label="URL Base"
+                                      Help="The path Debarr is served under behind a reverse proxy, such as /debarr. Empty serves it at the root." />
+                </PageSection>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <PageSection Title="Logging">
+                    <HostSettingField @bind-Value="_form.Model.LogLevel" Key="@GeneralSettingsForm.LogLevelKey" id="general-log-level" Label="Log Level">
+                        @foreach (var level in Enum.GetValues<LogLevel>())
+                        {
+                            <MudSelectItem Value="@level">@level</MudSelectItem>
+                        }
+                    </HostSettingField>
+                </PageSection>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <PageSection Title="FFmpeg">
+                    <HostSettingField @bind-Value="_form.Model.FfmpegPath" Key="@GeneralSettingsForm.FfmpegPathKey" id="general-ffmpeg-path" Label="FFmpeg Path"
+                                      Help="The ffmpeg that measures the picture. A bare name is looked up on the PATH." />
+                    <HostSettingField @bind-Value="_form.Model.FfprobePath" Key="@GeneralSettingsForm.FfprobePathKey" id="general-ffprobe-path" Label="FFprobe Path"
+                                      Help="The ffprobe that reads the container ratio. A bare name is looked up on the PATH." />
+                </PageSection>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+}

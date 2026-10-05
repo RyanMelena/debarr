@@ -1,0 +1,28 @@
+/* Inline, so a long state wraps with the text around it. */
+.state-label {
+    font-weight: 500;
+}
+
+    .state-label ::deep .mud-icon-root {
+        width: 1.15em;
+        height: 1.15em;
+        margin-right: 0.3em;
+        font-size: inherit;
+        vertical-align: -0.2em;
+    }
+
+.state-label-changed {
+    animation: state-label-change 200ms ease-out;
+}
+
+@keyframes state-label-change {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .state-label-changed {
+        animation: none;
+    }
+}

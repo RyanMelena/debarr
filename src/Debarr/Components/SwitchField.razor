@@ -1,0 +1,7 @@
+<div class="switch-field">
+    <MudSwitch T="bool" @attributes="AdditionalAttributes" Value="Value" ValueChanged="ValueChanged" Label="@Label" Disabled="Disabled" Color="Color.Primary" UncheckedColor="Color.Default" />
+    @if (HelperText is not null)
+    {
+        <p class="mud-input-helper-text mud-input-helper-text-contained switch-field-helper">@HelperText</p>
+    }
+</div>

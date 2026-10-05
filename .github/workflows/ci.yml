@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # A push to main runs this through the publish workflow, where the run is worth finishing.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # src/global.json selects the test runner, so the SDK has to resolve it from here.
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Debarr.sln
+
+      - name: Build
+        run: dotnet build Debarr.sln -c Release --no-restore
+
+      # Detection tests that need ffmpeg on PATH, and identification tests that need a synced
+      # database, skip themselves on the runner.
+      - name: Test
+        run: dotnet test Debarr.sln -c Release
+
+  image:
+    name: Build image
+    # The publish workflow builds and pushes the image, so this job covers pull requests only.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: src
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

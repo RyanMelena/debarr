@@ -1,0 +1,27 @@
+.paged-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* SortSelect replaces the table's own phone sort select, which can't show or change the direction. */
+.paged-table ::deep .mud-table-smalldevices-sortselect {
+    display: none;
+}
+
+.paged-table ::deep .paged-table-row-enter {
+    animation: paged-table-row-enter 250ms ease-out;
+}
+
+@keyframes paged-table-row-enter {
+    from {
+        opacity: 0;
+        background-color: var(--mud-palette-action-default-hover);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .paged-table ::deep .paged-table-row-enter {
+        animation: none;
+    }
+}

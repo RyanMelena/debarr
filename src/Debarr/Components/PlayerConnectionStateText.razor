@@ -1,0 +1,28 @@
+@switch (State)
+{
+    case PlayerConnectionState.Connected connected:
+        <div><StateLabel Icon="@Icons.Material.Outlined.Link" Color="Color.Success">Connected to @connected.Version</StateLabel></div>
+        <div class="mud-text-secondary">Since <DateTimeText Value="connected.Since" /></div>
+        break;
+    case PlayerConnectionState.Disconnected disconnected:
+        <div><StateLabel Icon="@Icons.Material.Outlined.LinkOff" Color="Color.Error">Disconnected: @disconnected.Error</StateLabel></div>
+        <div class="mud-text-secondary">
+            Since <DateTimeText Value="disconnected.Since" /> ·
+            @if (disconnected.RetryAt is { } retryAt)
+            {
+                <span>Retries <DateTimeText Value="retryAt" /></span>
+            }
+            else
+            {
+                <span>Retrying now</span>
+            }
+        </div>
+        break;
+    case PlayerConnectionState.Connecting connecting:
+        <div><StateLabel Icon="@Icons.Material.Outlined.Sync" Color="Color.Info">Connecting</StateLabel></div>
+        <div class="mud-text-secondary">Since <DateTimeText Value="connecting.Since" /></div>
+        break;
+    default:
+        <div><StateLabel Icon="@Icons.Material.Outlined.LinkOff">Not connected</StateLabel></div>
+        break;
+}

@@ -1,0 +1,98 @@
+/* The navigation scrolls when the running work and the activity messages outgrow the screen. */
+.drawer-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+}
+
+    /* The running work and the activity messages sit at the bottom of the navigation. */
+    .drawer-content .drawer-activity {
+        margin-top: auto;
+    }
+
+    .drawer-content ::deep .activity-messages {
+        padding: 8px;
+    }
+
+    /* The current page's item carries an amber edge as well as its colour. */
+    .drawer-content ::deep .mud-nav-link.active {
+        box-shadow: inset 3px 0 0 var(--mud-palette-primary);
+        font-weight: 600;
+    }
+
+    /* The System item's badge sits at its right edge. */
+    .drawer-content ::deep .nav-group-title {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding-right: 8px;
+    }
+
+.app-bar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 8px;
+    color: inherit;
+    font-size: 1.125rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+
+    .app-bar-brand ::deep .logo {
+        flex: none;
+    }
+
+/* Blazor shows this bar when an error stops the page, and hides it on Dismiss. */
+#blazor-error-ui {
+    background: var(--mud-palette-error);
+    bottom: 0;
+    box-shadow: var(--mud-elevation-8);
+    box-sizing: border-box;
+    color: var(--mud-palette-error-text);
+    display: none;
+    left: 0;
+    padding: 10px 16px;
+    position: fixed;
+    width: 100%;
+    z-index: 1600;
+}
+
+    #blazor-error-ui .blazor-error-ui-content {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        margin: 0 auto;
+        max-width: 1280px;
+    }
+
+    #blazor-error-ui .blazor-error-ui-text {
+        flex: 1;
+    }
+
+    #blazor-error-ui button {
+        background: transparent;
+        border: 1px solid currentColor;
+        border-radius: var(--mud-default-borderradius);
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 600;
+        padding: 4px 14px;
+        text-decoration: none;
+    }
+
+    /* The dismiss button sits in the row after Reload. */
+    #blazor-error-ui button.dismiss {
+        border-color: transparent;
+        display: inline-flex;
+        padding: 4px;
+        position: static;
+    }
+
+    #blazor-error-ui button:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }

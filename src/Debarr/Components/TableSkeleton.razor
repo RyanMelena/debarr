@@ -1,0 +1,15 @@
+@for (var row = 0; row < Rows; row++)
+{
+    <tr class="table-skeleton-row" aria-hidden="true">
+        @for (var column = 0; column < Columns; column++)
+        {
+            <td>
+                <MudSkeleton Width="80%" />
+                @if (TwoLines)
+                {
+                    <MudSkeleton Width="50%" />
+                }
+            </td>
+        }
+    </tr>
+}

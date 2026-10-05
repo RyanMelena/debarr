@@ -1,0 +1,8 @@
+@inherits LiveComponentBase
+@if (_messages.Count > 0)
+{
+    <span id="health-badge" class="health-badge @(HasError ? "health-badge-error" : "health-badge-warning")" title="@Description">
+        <span aria-hidden="true">@_messages.Count</span>
+        <span class="health-badge-description">@Description</span>
+    </span>
+}

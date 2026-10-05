@@ -1,0 +1,106 @@
+@page "/system/logs"
+@inherits LiveComponentBase
+@using Debarr.Extensions
+
+<PageTitle>Logs - Debarr</PageTitle>
+
+<PageHeader Title="Logs" />
+
+@if (_files is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_files.Count == 0)
+{
+    <MudText id="logs-empty">No log files yet. Debarr writes one each day to the logs folder in the data directory.</MudText>
+}
+else
+{
+    <MudPaper Outlined="true">
+        <MudSimpleTable id="log-files" Class="stacked-table" Dense="true" Elevation="0">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Size</th>
+                    <th>Last Write</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var file in _files)
+                {
+                    var lastWrite = new DateTimeOffset(file.LastWriteTimeUtc);
+                    <tr @key="file.Name" class="@RowClass(file)" aria-current="@(IsShown(file) ? "true" : null)">
+                        <td>
+                            <MudButton Variant="Variant.Text" OnClick="() => ShowAsync(file)">@file.Name</MudButton>
+                        </td>
+                        <td data-label="Size">@file.Length.ToFileSizeText()</td>
+                        <td data-label="Last Write"><DateTimeText Value="lastWrite" /></td>
+                        <td class="stacked-table-actions">
+                            <MudIconButton Href="@($"system/logs/{file.Name}")" Icon="@Icons.Material.Filled.Download"
+                                           Size="Size.Small" aria-label="@($"Download {file.Name}")" download="@file.Name" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudPaper>
+
+    @if (_shown is not null && _entries is not null)
+    {
+        <div class="mt-6">
+            <PageSection Title="@_shown.Name">
+                <Description>
+                    @if (_lineCount == LineCount)
+                    {
+                        @($"The entries in the last {LineCount.ToCountText()} lines, newest first. Download the file for all of it.")
+                    }
+                    else
+                    {
+                        @("Newest first.")
+                    }
+                </Description>
+                <ChildContent>
+                    <div class="logs">
+                        <FilterBar Id="log" Chips="Filters.Select(filter => new FilterChip(filter.Value, filter.Label, CountOf(filter)))"
+                                   SelectedFilter="@_filter.Value" SelectedFilterChanged="SelectFilter"
+                                   Search="@_search" SearchChanged="Search" SearchPlaceholder="Search messages and sources" />
+                        <MudTable T="Row" id="log-entries" Items="_shownEntries" RowsPerPage="TableView.DefaultPageSize" Dense="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.Sm">
+                            <HeaderContent>
+                                <MudTh>Time</MudTh>
+                                <MudTh>Level</MudTh>
+                                <MudTh>Source</MudTh>
+                                <MudTh>Message</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Time" Class="log-nowrap"><DateTimeText Value="context.Entry.Time" WithSeconds="true" /></MudTd>
+                                <MudTd DataLabel="Level" Class="log-nowrap">
+                                    <StateLabel Class="log-level" Icon="@LevelIcon(context.Entry.Level)" Color="@LevelColor(context.Entry.Level)">@LevelText(context.Entry.Level)</StateLabel>
+                                </MudTd>
+                                <MudTd DataLabel="Source"><span class="log-source" title="@context.Entry.Source">@ShortSource(context.Entry.Source)</span></MudTd>
+                                <MudTd DataLabel="Message" Class="log-message">
+                                    <div>
+                                        <div class="log-message-text"><PathText Value="@context.Entry.Message" /></div>
+                                        @if (context.Entry.Detail is { } detail)
+                                        {
+                                            <details class="log-detail">
+                                                <summary>Details</summary>
+                                                <pre>@detail</pre>
+                                            </details>
+                                        }
+                                    </div>
+                                </MudTd>
+                            </RowTemplate>
+                            <NoRecordsContent>
+                                <MudText id="log-no-match">No entries match.</MudText>
+                            </NoRecordsContent>
+                            <PagerContent>
+                                <MudTablePager PageSizeOptions="TableView.PageSizes" />
+                            </PagerContent>
+                        </MudTable>
+                    </div>
+                </ChildContent>
+            </PageSection>
+        </div>
+    }
+}

@@ -1,0 +1,15 @@
+<div class="filter-bar d-flex flex-wrap align-center gap-2">
+    <MudChipSet T="string" id="@($"{Id}-filters")" Class="filter-bar-filters" SelectedValue="@SelectedFilter" SelectedValueChanged="SelectedFilterChanged"
+                SelectionMode="SelectionMode.SingleSelection" Size="Size.Small" Variant="Variant.Outlined" SelectedColor="Color.Primary">
+        @foreach (var chip in Chips)
+        {
+            <MudChip T="string" Value="@chip.Value" id="@($"{Id}-filter-{chip.Value}")">
+                @chip.Label <span class="filter-bar-count">@chip.Count.ToCountText()</span>
+            </MudChip>
+        }
+    </MudChipSet>
+    @ChildContent
+    <MudTextField T="string" id="@($"{Id}-search")" Value="Search" ValueChanged="SearchChanged" Placeholder="@SearchPlaceholder"
+                  Immediate="true" DebounceInterval="300" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="filter-bar-search flex-grow-0" />
+</div>

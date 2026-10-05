@@ -1,0 +1,43 @@
+.log-file-shown td {
+    background-color: var(--mud-palette-action-default-hover);
+}
+
+.log-file ::deep .mud-button-root {
+    justify-content: flex-start;
+    text-align: start;
+    text-transform: none;
+}
+
+.logs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.logs ::deep .log-nowrap {
+    white-space: nowrap;
+}
+
+.log-detail summary {
+    cursor: pointer;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8rem;
+}
+
+.log-detail pre {
+    margin: 0.25rem 0 0;
+    max-height: 20rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 960px) {
+    /* A card sets each value beside its label; a message reads from the left, however short. */
+    .logs ::deep .log-message > div {
+        flex: 1;
+        text-align: start;
+    }
+}

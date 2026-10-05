@@ -1,0 +1,24 @@
+@typeparam TRow
+
+<div class="paged-table">
+    <SortSelect Options="View.SortOptions" Sort="@View.Current.Sort" Descending="View.Current.Descending" SortChanged="View.SortAsync" />
+
+    <MudTable @ref="View.Table" T="TRow" id="@Id" ServerData="ReadAsync" RowClassFunc="View.RowClass" Dense="true" Hover="true" Outlined="true" Elevation="0" Breakpoint="Breakpoint.Sm"
+              CurrentPage="View.Current.Page" CurrentPageChanged="View.PageChanged" RowsPerPage="View.Current.PageSize" RowsPerPageChanged="View.PageSizeChanged" AllowUnsorted="false">
+        <HeaderContent>
+            @HeaderContent
+        </HeaderContent>
+        <RowTemplate>
+            @RowTemplate(context)
+        </RowTemplate>
+        <NoRecordsContent>
+            @NoRecordsContent
+        </NoRecordsContent>
+        <LoadingContentBody>
+            <TableSkeleton Rows="@SkeletonRows" Columns="Columns" TwoLines="true" />
+        </LoadingContentBody>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="TableView.PageSizes" />
+        </PagerContent>
+    </MudTable>
+</div>

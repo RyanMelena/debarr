@@ -1,0 +1,10 @@
+<div class="sort-select">
+    <MudSelect T="string" Value="@Sort" ValueChanged="SelectAsync" Label="Sort By" Variant="Variant.Outlined" Margin="Margin.Dense" Class="sort-select-column">
+        @foreach (var option in Options)
+        {
+            <MudSelectItem Value="@option.Value">@option.Label</MudSelectItem>
+        }
+    </MudSelect>
+    <MudButton Class="sort-select-direction" Variant="Variant.Outlined" StartIcon="@(Descending ? Icons.Material.Filled.ArrowDownward : Icons.Material.Filled.ArrowUpward)"
+               aria-label="@($"Sorted {DirectionText}. Reverse the order.")" OnClick="ReverseAsync">@DirectionText</MudButton>
+</div>

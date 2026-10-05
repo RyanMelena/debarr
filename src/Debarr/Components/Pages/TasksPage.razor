@@ -1,0 +1,199 @@
+@page "/system/tasks"
+@inherits LiveComponentBase
+
+<PageTitle>Tasks - Debarr</PageTitle>
+
+<PageHeader Title="Tasks" Error="@_scanNow.Error" />
+
+@if (!_loaded)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <div class="tasks d-flex flex-column gap-6">
+        <PageSection Title="Scheduled">
+            <Actions>
+                @if (RunningLibraryScan is not null)
+                {
+                    <MudButton id="tasks-library-scan-run" Variant="Variant.Outlined" Disabled="true">
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />Scanning
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton id="tasks-library-scan-run" Color="Color.Primary" Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Refresh" OnClick="ScanNowAsync" Disabled="@_scanNow.Running">Scan Now</MudButton>
+                }
+            </Actions>
+            <Description>
+                A library scan reads every enabled root folder, adds the files it finds and removes the ones that are gone.
+                It runs every interval, at startup when the library has an enabled root folder or a video file, when a root folder is added or enabled, and on Scan Now.
+                Its interval is set in <MudLink Href="settings/library" Typo="Typo.body2">Settings &gt; Library</MudLink>.
+            </Description>
+            <ChildContent>
+                <MudSimpleTable id="tasks-scheduled" Class="stacked-table" Dense="true" Elevation="0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Interval</th>
+                            <th>Last Run</th>
+                            <th>Last Duration</th>
+                            <th>Next Run</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="tasks-library-scan">
+                            <td data-label="Name">Library Scan</td>
+                            <td class="tasks-library-scan-interval" data-label="Interval">@IntervalText</td>
+                            <td class="tasks-library-scan-last-run" data-label="Last Run">
+                                <LastScanText Scan="LastScanText.Of(LastLibraryScan)" />
+                            </td>
+                            <td data-label="Last Duration">@LastLibraryScan?.Duration?.ToDisplayText()</td>
+                            <td class="tasks-library-scan-next-run" data-label="Next Run">
+                                @if (_nextScheduledLibraryScan is { } nextRun)
+                                {
+                                    <DateTimeText Value="nextRun" />
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+                @if (!_hasEnabledRootFolder)
+                {
+                    <MudText id="tasks-no-roots" Typo="Typo.body2">
+                        No root folder is enabled, so a library scan reads nothing. <MudLink Href="settings/library" Typo="Typo.body2">Add one in Settings &gt; Library</MudLink>.
+                    </MudText>
+                }
+            </ChildContent>
+        </PageSection>
+
+        <PageSection Title="Library Scans">
+            @if (_libraryScanSummaries.Count == 0)
+            {
+                <MudText id="tasks-library-scans-none">No library scan has run yet.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="tasks-library-scans" Class="stacked-table" Dense="true" Elevation="0">
+                    <thead>
+                        <tr>
+                            <th>Started</th>
+                            <th>Duration</th>
+                            <th>File Paths Found</th>
+                            <th>Files Hashed</th>
+                            <th>New Video Files</th>
+                            <th>File Paths Removed</th>
+                            <th>Video Files Archived</th>
+                        </tr>
+                    </thead>
+                    <MotionList TableBody="true" Items="_libraryScanSummaries" Key="summary => summary.Id" Context="entry">
+                            @{ var summary = entry.Item; }
+                            <tr class="@entry.Class">
+                                <td data-label="Started"><DateTimeText Value="summary.StartedAt" /></td>
+                                <td class="tasks-library-scan-duration" data-label="Duration">
+                                    @if (summary.Closed)
+                                    {
+                                        @summary.Duration?.ToDisplayText()
+                                    }
+                                    else
+                                    {
+                                        @if (_libraryScanStopping)
+                                        {
+                                            <StateLabel Icon="@Icons.Material.Outlined.Sync" Color="Color.Info">Stopping</StateLabel>
+                                        }
+                                        else
+                                        {
+                                            <StateLabel Icon="@Icons.Material.Outlined.Sync" Color="Color.Info">Running for <ElapsedTime Since="summary.StartedAt" /></StateLabel>
+                                        }
+                                    }
+                                </td>
+                                <td class="tasks-library-scan-found" data-label="File Paths Found">@summary.Counts?.FilePathsFound.ToCountText()</td>
+                                <td data-label="Files Hashed">@summary.Counts?.FilesHashed.ToCountText()</td>
+                                <td data-label="New Video Files">@summary.Counts?.VideoFilesAdded.ToCountText()</td>
+                                <td data-label="File Paths Removed">@summary.Counts?.FilePathsDeleted.ToCountText()</td>
+                                <td data-label="Video Files Archived">@summary.Counts?.VideoFilesArchived.ToCountText()</td>
+                            </tr>
+                            @switch (summary.Outcome)
+                            {
+                                case LibraryScanOutcome.Failed failed:
+                                    <tr class="stacked-table-continuation @entry.Class">
+                                        <td colspan="7" class="tasks-library-scan-outcome"><StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@failed.Error</StateLabel></td>
+                                    </tr>
+                                    break;
+                                case LibraryScanOutcome.Cancelled:
+                                    <tr class="stacked-table-continuation @entry.Class">
+                                        <td colspan="7" class="tasks-library-scan-outcome"><StateLabel Icon="@Icons.Material.Outlined.Cancel">Cancelled: Debarr shut down or a scan pause stopped the scan.</StateLabel></td>
+                                    </tr>
+                                    break;
+                                case LibraryScanOutcome.Interrupted:
+                                    <tr class="stacked-table-continuation @entry.Class">
+                                        <td colspan="7" class="tasks-library-scan-outcome"><StateLabel Icon="@Icons.Material.Outlined.PowerOff">Interrupted: Debarr stopped before the scan ended.</StateLabel></td>
+                                    </tr>
+                                    break;
+                            }
+                    </MotionList>
+                </MudSimpleTable>
+            }
+        </PageSection>
+
+        <PageSection Title="Root Folder Removal">
+            @if (_rootFolderRemovals.Count == 0)
+            {
+                <MudText id="tasks-root-folder-removal-none">No root folder removal running.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="tasks-root-folder-removals" Class="tasks-table stacked-table" Dense="true" Elevation="0">
+                    <colgroup>
+                        <col />
+                        <col class="tasks-column-elapsed" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Running</th>
+                            <th>Elapsed</th>
+                        </tr>
+                    </thead>
+                    <MotionList TableBody="true" Items="_rootFolderRemovals" Key="removal => removal.RootFolder">
+                        <tr id="tasks-root-folder-removal" class="@context.Class">
+                            <td><MudLink Href="settings/library"><PathText Value="@context.Item.RootFolder" /></MudLink></td>
+                            <td class="tasks-root-folder-removal-elapsed tasks-nowrap" data-label="Elapsed" title="@Formatter.FormatLongDateTime(context.Item.StartedAt)"><ElapsedTime Since="context.Item.StartedAt" /></td>
+                        </tr>
+                    </MotionList>
+                </MudSimpleTable>
+            }
+        </PageSection>
+
+        <PageSection Title="Detections">
+            @if (_runningDetections.Count == 0)
+            {
+                <MudText id="tasks-detections-none">No detection running.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable id="tasks-detections" Class="tasks-table stacked-table" Dense="true" Elevation="0">
+                    <colgroup>
+                        <col />
+                        <col class="tasks-column-origin" />
+                        <col class="tasks-column-elapsed" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Running</th>
+                            <th>Started By</th>
+                            <th>Elapsed</th>
+                        </tr>
+                    </thead>
+                    <MotionList TableBody="true" Items="_runningDetections" Key="running => running.VideoFile">
+                        <tr class="tasks-detection @context.Class">
+                            <td><MudLink Href="@($"video-file/{context.Item.VideoFile}")"><PathText Value="@context.Item.Path.Value" /></MudLink></td>
+                            <td class="tasks-nowrap" data-label="Started By">@context.Item.Origin.ToDisplayText()</td>
+                            <td class="tasks-detection-elapsed tasks-nowrap" data-label="Elapsed" title="@Formatter.FormatLongDateTime(context.Item.StartedAt)"><ElapsedTime Since="context.Item.StartedAt" /></td>
+                        </tr>
+                    </MotionList>
+                </MudSimpleTable>
+            }
+        </PageSection>
+    </div>
+}

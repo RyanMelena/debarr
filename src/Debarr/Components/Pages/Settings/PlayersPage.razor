@@ -1,0 +1,56 @@
+@page "/settings/players"
+@inherits LiveComponentBase
+
+<PageTitle>Players Settings - Debarr</PageTitle>
+
+<PageHeader Title="Players" />
+
+@if (_players is { Count: 0 })
+{
+    <MudText id="players-empty" Class="mb-4">
+        A player is a Kodi that Debarr connects to.
+        When it starts playing a video file under a root folder, Debarr sends that file's ratio to each notifier.
+        Add one to start.
+    </MudText>
+}
+
+@if (_players is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        @foreach (var player in _players)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <CardButton Class="player-card" OnClick="@(() => EditAsync(player))">
+                    <div class="d-flex align-center gap-2">
+                        <MudText Typo="Typo.h6">@player.Name</MudText>
+                        <MudChip T="string" Class="ms-auto" Size="Size.Small" Variant="Variant.Text"
+                                 Color="@(player.Enabled ? Color.Success : Color.Default)"
+                                 Icon="@(player.Enabled ? Icons.Material.Outlined.Check : Icons.Material.Outlined.PauseCircle)">@(player.Enabled ? "Enabled" : "Disabled")</MudChip>
+                    </div>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Kodi</MudText>
+                    @if (player.Endpoint is KodiEndpoint kodi)
+                    {
+                        <MudText Typo="Typo.body2" Class="mt-1">@kodi.Host:@kodi.Port</MudText>
+                    }
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@PathMappingsText(player)</MudText>
+                    @if (player.Enabled)
+                    {
+                        <div class="player-card-state mud-typography-body2 mt-2">
+                            <PlayerConnectionStateText State="StateOf(player)" />
+                        </div>
+                    }
+                </CardButton>
+            </MudItem>
+        }
+
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <CardButton id="players-add" Class="d-flex align-center justify-center" style="min-height: 7rem" aria-label="Add Player" OnClick="AddAsync">
+                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+            </CardButton>
+        </MudItem>
+    </MudGrid>
+}

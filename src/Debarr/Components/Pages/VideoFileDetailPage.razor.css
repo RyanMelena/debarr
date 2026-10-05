@@ -1,0 +1,101 @@
+.video-file-facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1.5rem;
+    row-gap: 0.25rem;
+    margin: 0;
+}
+
+.video-file-facts dt {
+    color: var(--mud-palette-text-secondary);
+}
+
+.video-file-facts dd {
+    margin: 0;
+    min-width: 0;
+}
+
+.video-file-hash {
+    min-width: 0;
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* A value with its copy button at its end. */
+.video-file-copyable {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.video-file-root {
+    font-size: 0.8rem;
+}
+
+.video-file-explanation {
+    font-size: 0.875rem;
+}
+
+::deep .video-file-nowrap {
+    white-space: nowrap;
+}
+
+/* On a desktop a path in the wide tables keeps enough width to read; on a tablet it wraps, and on a phone each row is a card. */
+@media (min-width: 961px) {
+    ::deep #video-file-detections .video-file-path,
+    ::deep #video-file-playbacks .video-file-path {
+        min-width: 16rem;
+    }
+}
+
+::deep .video-file-result {
+    min-width: 12rem;
+}
+
+::deep .video-file-samples {
+    max-width: 28rem;
+}
+
+/* A phone keeps the sample table within its width with narrower cell padding. */
+@media (max-width: 600px) {
+    ::deep .video-file-samples td {
+        white-space: nowrap;
+    }
+
+    ::deep .video-file-samples.mud-table-dense td,
+    ::deep .video-file-samples.mud-table-dense th {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+}
+
+/* Keeps a linked detection clear of the app bar. */
+::deep .video-file-detection {
+    scroll-margin-top: 5rem;
+}
+
+::deep .video-file-detection-selected {
+    background-color: var(--mud-palette-action-default-hover);
+}
+
+/* Plain-case tab labels keep all three tabs on a phone's width. */
+::deep #video-file-tabs .mud-tab {
+    text-transform: none;
+}
+
+/* A failure leads with what failed and when, then what it means, then the tool's own words. */
+.video-file-failure-title {
+    font-weight: 600;
+}
+
+.video-file-failure-time {
+    font-weight: 400;
+}
+
+.video-file-failure-detail {
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+}

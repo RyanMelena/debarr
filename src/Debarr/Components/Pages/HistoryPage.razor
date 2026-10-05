@@ -1,0 +1,93 @@
+@page "/history"
+@inherits LiveComponentBase
+
+<PageTitle>History - Debarr</PageTitle>
+
+<PageHeader Title="History" Error="@_clearHistory.Error">
+    <MudButton id="history-clear" Color="Color.Error" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ClearAll"
+               OnClick="ClearHistoryAsync" Disabled="@(_clearHistory.Running || _totalCount is not > 0)">Clear History</MudButton>
+</PageHeader>
+
+@if (_totalCount is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_totalCount == 0)
+{
+    <MudText id="history-empty">No playback yet. Each playback a player starts shows here, with what it sent.</MudText>
+}
+else
+{
+    <div class="history">
+        <FilterBar Id="history" Chips="Filters.Select(filter => new FilterChip(filter.Value, filter.Label, CountOf(filter)))"
+                   SelectedFilter="@SelectedFilter.Value" SelectedFilterChanged="SelectFilter"
+                   Search="@Search" SearchChanged="SearchFor" SearchPlaceholder="Search titles and paths">
+            @if (_playerNames.Count > 1)
+            {
+                <div class="history-player">
+                    <MudSelect T="string" id="history-player" Value="@Player" ValueChanged="SelectPlayer" Label="Player" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Clearable="true">
+                        @foreach (var playerName in _playerNames)
+                        {
+                            <MudSelectItem Value="@playerName">@playerName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+            }
+        </FilterBar>
+
+        <PagedTable TRow="PlaybackRow" View="_view" Id="history" ReadPage="ReadPageAsync" RowCount="CountOf(SelectedFilter)" Columns="6">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel T="PlaybackRow" SortLabel="@SortLabels.Time" SortDirection="_view.DirectionOf(SortLabels.Time)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Time, direction)">Time</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel T="PlaybackRow" SortLabel="@SortLabels.Player" SortDirection="_view.DirectionOf(SortLabels.Player)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Player, direction)">Player</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel T="PlaybackRow" SortLabel="@SortLabels.Title" SortDirection="_view.DirectionOf(SortLabels.Title)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Title, direction)">Title</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel T="PlaybackRow" SortLabel="@SortLabels.Path" SortDirection="_view.DirectionOf(SortLabels.Path)" SortDirectionChanged="direction => _view.SortChanged(SortLabels.Path, direction)">Path</MudTableSortLabel></MudTh>
+                <MudTh>Sent</MudTh>
+                <MudTh>Deliveries</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Time" Class="history-nowrap"><DateTimeText Value="context.OccurredAt" /></MudTd>
+                <MudTd DataLabel="Player" Class="history-nowrap">@context.PlayerName</MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Path" Class="history-path">
+                    <div class="history-path-cell">
+                        <span>
+                            @if (context.VideoFile is { } videoFile)
+                            {
+                                <MudLink Href="@($"video-file/{videoFile}")"><PathText Value="@context.LocalPath?.Value" /></MudLink>
+                            }
+                            else
+                            {
+                                <PathText Value="@context.Path" />
+                            }
+                        </span>
+                        <CopyButton Value="@context.Path" />
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Sent" Class="history-sent">
+                    <div>
+                        @if (context is { VideoFile: { } sentVideoFile, DetectionId: { } detectionId })
+                        {
+                            <MudLink Href="@($"video-file/{sentVideoFile}#detection-{detectionId}")"><PlaybackOutcomeText Outcome="context.Outcome" /></MudLink>
+                        }
+                        else
+                        {
+                            <PlaybackOutcomeText Outcome="context.Outcome" />
+                        }
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Deliveries" Class="@(context.Deliveries.Count > 0 ? "history-deliveries" : "history-deliveries history-no-deliveries")">
+                    <div>
+                        @foreach (var delivery in context.Deliveries)
+                        {
+                            <div @key="delivery.Id">@delivery.NotifierName · <DeliveryOutcomeText Delivery="delivery" /></div>
+                        }
+                    </div>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText id="history-no-match">No playbacks match.</MudText>
+            </NoRecordsContent>
+        </PagedTable>
+    </div>
+}

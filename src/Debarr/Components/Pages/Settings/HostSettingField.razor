@@ -1,0 +1,17 @@
+@typeparam T
+
+@if (ChildContent is null)
+{
+    <MudTextField T="T" Value="Value" ValueChanged="ValueChanged" For="ValueExpression" @attributes="AdditionalAttributes" Label="@Label" InputType="InputType"
+                  ReadOnly="@IsSetByVariable" Class="@SetByVariableClass"
+                  Adornment="@(IsSetByVariable ? Adornment.End : Adornment.None)" AdornmentIcon="@Icons.Material.Outlined.Lock" AdornmentAriaLabel="Set by an environment variable"
+                  HelperText="@HelperText" Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+}
+else
+{
+    <MudSelect T="T" Value="Value" ValueChanged="ValueChanged" @attributes="AdditionalAttributes" Label="@Label"
+               Disabled="@IsSetByVariable" Class="@SetByVariableClass" HelperText="@HelperText"
+               Variant="Variant.Outlined" Margin="Margin.Dense">
+        @ChildContent
+    </MudSelect>
+}

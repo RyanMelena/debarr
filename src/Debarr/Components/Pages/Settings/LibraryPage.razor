@@ -1,0 +1,108 @@
+@page "/settings/library"
+@inherits LiveComponentBase
+
+<PageTitle>Library Settings - Debarr</PageTitle>
+
+<PageHeader Title="Library" Error="@PageAction.ErrorOf(_save, _rootFolderAction)">
+    @if (_form.Model is not null)
+    {
+        <SaveButton id="library-save" HasUnsavedChanges="_form.HasUnsavedChanges" Saving="_save.Running" Disabled="_rootFolderAction.Running" OnSave="SaveAsync" />
+    }
+</PageHeader>
+
+@if (_form.Model is null)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12">
+            <PageSection Title="Root Folders">
+                <Description>Debarr scans each root folder for video files. Adding, enabling and removing a root folder applies at once, without Save.</Description>
+                <ChildContent>
+                    @if (_roots.Count == 0)
+                    {
+                        <MudText id="library-root-folders-empty">Add a folder that holds video files.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable id="library-root-folders" Class="stacked-table" Dense="true" Elevation="0">
+                            <thead>
+                                <tr>
+                                    <th>Path</th>
+                                    <th>File Paths</th>
+                                    <th>Last Scan</th>
+                                    <th>Enabled</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <MotionList TableBody="true" Items="_roots" Key="row => row.Path" Context="entry">
+                                    @{ var row = entry.Item; }
+                                    <tr class="@entry.Class" id="@(row.Removal is null ? null : "library-root-folder-removing")">
+                                        <td>
+                                            <div class="library-root-folder-path"><PathText Value="@row.Path" /></div>
+                                            @if (row.LastScan?.Error is { } scanError)
+                                            {
+                                                <div class="library-root-folder-scan-error"><StateLabel Icon="@Icons.Material.Outlined.ErrorOutline" Color="Color.Error">@scanError</StateLabel></div>
+                                            }
+                                        </td>
+                                        <td class="library-root-folder-file-paths" data-label="File Paths">@_filePathCounts.GetValueOrDefault(row.Path).ToCountText()</td>
+                                        <td class="library-root-folder-last-scan" data-label="Last Scan">
+                                            @if (row.Removal is { } removal)
+                                            {
+                                                <RootFolderRemovalText StartedAt="removal.StartedAt" />
+                                            }
+                                            else
+                                            {
+                                                <LastScanText Scan="LastScanText.Of(row.LastScan)" />
+                                            }
+                                        </td>
+                                        @if (row.RootFolder is { } root)
+                                        {
+                                            <td data-label="Enabled">
+                                                <MudSwitch T="bool" Value="@root.Enabled" ValueChanged="@(enabled => SetRootFolderEnabledAsync(root, enabled))"
+                                                           Disabled="@Busy" Color="Color.Primary" UncheckedColor="Color.Default" aria-label="@($"Enable {root.Path.Value}")" />
+                                            </td>
+                                            <td class="text-right stacked-table-actions">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="@Busy"
+                                                               aria-label="@($"Remove {root.Path.Value}")" OnClick="@(() => RemoveRootFolderAsync(root))" />
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td data-label="Enabled"></td>
+                                            <td></td>
+                                        }
+                                    </tr>
+                            </MotionList>
+                        </MudSimpleTable>
+                    }
+                    <div class="d-flex gap-2 align-start">
+                        <MudTextField T="string" Class="flex-grow-1" Value="@_newRootFolderPath" ValueChanged="SetNewRootFolderPath" id="library-root-folder-path" Label="Folder"
+                                      Error="@(NewRootFolderError is not null)" ErrorText="@NewRootFolderError"
+                                      Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudButton id="library-add-root" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add"
+                                   Class="mt-2 flex-none" OnClick="AddRootFolderAsync" Disabled="@(Busy || string.IsNullOrWhiteSpace(_newRootFolderPath))">Add Root Folder</MudButton>
+                    </div>
+                </ChildContent>
+            </PageSection>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <PageSection Title="Scanning">
+                <MudForm @ref="_mudForm" Model="@_form.Model" Class="d-flex flex-column gap-4">
+                    <MudTextField @bind-Value="_form.Model.VideoExtensions" @bind-Value:after="@(() => _save.ClearFieldError(nameof(LibrarySettingsForm.VideoExtensions)))" id="library-video-extensions" @attributes="_save.FieldErrorAttributes(nameof(LibrarySettingsForm.VideoExtensions))" Label="Video Extensions"
+                                  Validation="@(new Func<string, string?>(ValidateVideoExtensions))"
+                                  HelperText="Separated by spaces"
+                                  Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    <MudNumericField @bind-Value="_form.Model.ScanIntervalHours" @bind-Value:after="@(() => _save.ClearFieldError(nameof(LibrarySettingsForm.ScanIntervalHours)))" id="library-scan-interval" @attributes="_save.FieldErrorAttributes(nameof(LibrarySettingsForm.ScanIntervalHours))" Label="Scan Interval"
+                                     HelperText="Hours between library scans. 0 switches the scheduled scan off."
+                                     Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    <SwitchField @bind-Value="_form.Model.WatchFolders" id="library-watch" Label="Watch Folders"
+                                 HelperText="Scan a folder once its files have been quiet for 10 seconds" />
+                </MudForm>
+            </PageSection>
+        </MudItem>
+    </MudGrid>
+}

@@ -1,0 +1,7 @@
+<MotionList id="activity-messages" Class="activity-messages" Items="_messages" Key="message => message.Text">
+    <div class="activity-message @context.Class">
+        <div>
+            <MudAlert Severity="@context.Item.Severity" Dense="true" Class="mb-2"><PathText Value="@context.Item.Text" /></MudAlert>
+        </div>
+    </div>
+</MotionList>

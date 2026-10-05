@@ -1,0 +1,11 @@
+@page "/Error"
+
+<PageTitle>Error - Debarr</PageTitle>
+
+<PageHeader Title="Something Went Wrong" />
+<MudText id="error-text" Class="mb-2">Debarr could not show this page. System &gt; Logs has the details.</MudText>
+@if (ShowRequestId)
+{
+    <MudText id="error-request-id" Class="mud-text-secondary mb-2">Request ID <code>@RequestId</code></MudText>
+}
+<MudLink Href="system/logs">Open System &gt; Logs</MudLink>

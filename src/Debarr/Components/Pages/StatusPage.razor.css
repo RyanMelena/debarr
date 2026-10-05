@@ -1,0 +1,36 @@
+.status ::deep .status-wrap {
+    overflow-wrap: anywhere;
+}
+
+.status ::deep .status-nowrap {
+    white-space: nowrap;
+}
+
+/* A health message's link keeps the page name it names on one line. */
+.status ::deep .status-health-link {
+    white-space: nowrap;
+}
+
+/* From tablet width, fixed column widths keep each column in its place as the values in it change. */
+@media (min-width: 600px) {
+    .status ::deep .status-table table {
+        table-layout: fixed;
+    }
+
+    .status ::deep .status-column-name {
+        width: 20%;
+    }
+
+    .status ::deep .status-column-state {
+        width: 30%;
+    }
+}
+
+/* A health message's spacing sits inside the part that grows and shrinks, and the list takes back the last one's. */
+.status ::deep .status-health-item {
+    padding-bottom: 8px;
+}
+
+.status ::deep #status-health {
+    margin-bottom: -8px;
+}

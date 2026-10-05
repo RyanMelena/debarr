@@ -1,0 +1,18 @@
+.tasks ::deep .tasks-nowrap {
+    white-space: nowrap;
+}
+
+/* From tablet width, fixed column widths keep each column in its place as the values in it change. */
+@media (min-width: 600px) {
+    .tasks ::deep .tasks-table table {
+        table-layout: fixed;
+    }
+
+    .tasks ::deep .tasks-column-origin {
+        width: 9rem;
+    }
+
+    .tasks ::deep .tasks-column-elapsed {
+        width: 7rem;
+    }
+}
