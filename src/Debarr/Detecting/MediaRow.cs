@@ -201,9 +201,6 @@ public static class MediaRowQuery
     /// <summary>The shortest search the trigram index takes; a shorter one scans the paths.</summary>
     public const int TrigramLength = 3;
 
-    /// <summary>How many ids one read loads, which stays under SQLite's parameter limit.</summary>
-    private const int LoadBatchSize = 500;
-
     /// <summary>Whether Media lists any video file.</summary>
     public static Task<bool> AnyListedMediaRowAsync(this IQuerySession session, CancellationToken cancellationToken) =>
         session.Query<MediaRow>().AnyAsync(row => row.HasFilePath, cancellationToken);
@@ -280,16 +277,8 @@ public static class MediaRowQuery
     }
 
     /// <summary>The Media rows of the video files among <paramref name="fileHashes"/> that have one.</summary>
-    public static async Task<IReadOnlyList<MediaRow>> LoadMediaRowsAsync(this IQuerySession session, IEnumerable<FileHash> fileHashes, CancellationToken cancellationToken)
-    {
-        List<MediaRow> rows = [];
-        foreach (var batch in fileHashes.Distinct().Select(fileHash => fileHash.StreamId).Chunk(LoadBatchSize))
-        {
-            rows.AddRange(await session.LoadManyAsync<MediaRow>(cancellationToken, batch));
-        }
-
-        return rows;
-    }
+    public static Task<IReadOnlyList<MediaRow>> LoadMediaRowsAsync(this IQuerySession session, IEnumerable<FileHash> fileHashes, CancellationToken cancellationToken) =>
+        session.LoadManyAsync<MediaRow>(cancellationToken, [.. fileHashes.Distinct().Select(fileHash => fileHash.StreamId)]);
 
     /// <summary>The rows Media lists that the search matches; every listed row when it is blank.</summary>
     public static IQueryable<MediaRow> Listed(this IQueryable<MediaRow> rows, string? search)

@@ -299,7 +299,8 @@ public sealed class MediaRowQueryTests : AppTestContext
         var existing = await AddAsync(["/media/film.mkv"]);
 
         await using var session = Store.QuerySession();
-        var found = await session.LoadMediaRowsAsync([existing, TestFileHash.For("missing"), existing], CancellationToken);
+        var missing = Enumerable.Range(0, 40_000).Select(index => TestFileHash.For($"missing-{index}"));
+        var found = await session.LoadMediaRowsAsync([existing, .. missing, existing], CancellationToken);
 
         Assert.Equal([existing], found.Select(row => row.FileHash));
     }
