@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageVersion Include="bunit" Version="2.11.3" />
     <PackageVersion Include="CliWrap" Version="3.10.5" />
-    <PackageVersion Include="Fisher" Version="1.14.0" />
+    <PackageVersion Include="Fisher" Version="1.19.0" />
     <PackageVersion Include="FluentResults" Version="4.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
