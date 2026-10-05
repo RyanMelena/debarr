@@ -95,8 +95,21 @@ public sealed class FolderWatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_deleted_folder_scans_that_folder_and_its_parent()
+    {
+        var movie = Directory.CreateDirectory(Path.Combine(Root, "movie")).FullName;
+        File.WriteAllText(Path.Combine(movie, "a.mkv"), "alpha");
+        await StartWatchingAsync();
+
+        Directory.Delete(movie, recursive: true);
+
+        await Poll.UntilAsync(async () => (await ReadScheduledFolderScansAsync()).SequenceEqual([Root, movie]));
+    }
+
+    [Fact]
     public async Task A_watcher_error_runs_a_library_scan()
     {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Deleting a watched folder fails the watcher's read of its changes on Windows only.");
         await StartWatchingAsync();
 
         // Deleting the watched folder fails the watcher's read of its changes.

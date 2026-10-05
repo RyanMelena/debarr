@@ -8,6 +8,7 @@ using Debarr.Tests.EventStore.Probing;
 using Debarr.Tests.Extensions;
 using Fisher;
 using Fisher.Services;
+using JasperFx.CodeGeneration;
 using JasperFx.Events.Projections;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +46,13 @@ public sealed class CommandPipelineTests : BunitContext, IAsyncLifetime
         {
             services.AddSingleton<ILoggerProvider>(_logs);
             services.AddLogging(logging => logging.AddFilter<FakeLoggerProvider>("Debarr", LogLevel.Debug));
-            services.ConfigureWolverine(options => options.Discovery.IncludeType(typeof(RenameProbeHandler)));
+            services.ConfigureWolverine(options =>
+            {
+                options.Discovery.IncludeType(typeof(RenameProbeHandler));
+
+                // The probe's handler has no pre-generated type, so a Release build generates every handler at runtime.
+                options.CodeGeneration.TypeLoadMode = TypeLoadMode.Dynamic;
+            });
             services.ConfigureFisher(options =>
             {
                 options.Projections.Add(new ProbeRowProjection(), ProjectionLifecycle.Inline);
