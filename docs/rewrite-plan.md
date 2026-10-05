@@ -20,6 +20,7 @@ A task's commit marks it done here.
 | M13. Known issues after M12 | 95 to 109 | Done |
 | M14. Critter Stack audit and M13 follow-ups | 110 to 119 | Done; task 114 changed no code, since Wolverine already checks at startup |
 | M15. Complexity audit | 120 to 127 | Done |
+| M16. Known issues after M15 | 128 | Not started |
 
 ## Decisions
 
@@ -531,3 +532,10 @@ The order puts the one-file tasks first, task 121 before task 125, which edits t
      The *Running work* row in the *Names* table names the root folder removal, which the component has shown since task 82, and the component shows no folder scans, as now.
 127. **One session for a hashed file's stored facts.**
      `LibraryScanner.HashAsync` reads the stored file path and the stream's state in one query session, where it opens two in a row.
+
+### M16. Known issues after M15
+
+128. **A root folder that comes back is watched again.**
+     A watcher whose root folder goes missing, such as an unmounted share, stops for good, and today only a library settings save or a restart watches the root folder again.
+     A library scan that finds an enabled root folder present and unwatched, while watching folders is on, starts its watcher, and *Watch folders* in [domain-model.md](domain-model.md) says so in the same commit.
+     A test removes a root folder, creates it again, runs a library scan, and finds a change in it schedules a folder scan.

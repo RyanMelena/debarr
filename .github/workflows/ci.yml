@@ -32,13 +32,16 @@ jobs:
           key: nuget-${{ runner.os }}-${{ hashFiles('src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Restore
         run: dotnet restore Debarr.sln
 
       - name: Build
         run: dotnet build Debarr.sln -c Release --no-restore
 
-      # Detection tests that need ffmpeg on PATH, and identification tests that need a synced
+      # Detection tests that need the fixtures in .dev, and identification tests that need a synced
       # database, skip themselves on the runner.
       - name: Test
         run: dotnet test Debarr.sln -c Release
