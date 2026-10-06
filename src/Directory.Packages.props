@@ -23,7 +23,7 @@
     <PackageVersion Include="StreamJsonRpc" Version="2.25.29" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />
     <PackageVersion Include="WolverineFx.Fisher" Version="6.46.0" />
-    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.43.0" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.46.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.1" />
   </ItemGroup>
 
