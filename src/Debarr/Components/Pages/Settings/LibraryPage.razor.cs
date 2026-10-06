@@ -72,6 +72,15 @@ public partial class LibraryPage(IDocumentStore store, RootFolderRemover rootFol
         _rootFolderAction.ClearFieldError(nameof(AddRootFolder.Path));
     }
 
+    /// <summary>Opens the folder browser from the typed folder, and puts the folder the operator chooses in the field.</summary>
+    private async Task ChooseRootFolderAsync()
+    {
+        if (await dialogService.ChooseFolderAsync(_newRootFolderPath) is { } folder)
+        {
+            SetNewRootFolderPath(folder);
+        }
+    }
+
     private Task AddRootFolderAsync() => _rootFolderAction.RunAsync(async () =>
     {
         var command = AddRootFolder.Parse(_newRootFolderPath, timeProvider.GetUtcNow());

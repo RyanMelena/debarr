@@ -1,0 +1,40 @@
+/* A height that keeps the modal inside a phone's screen, with the folders scrolling inside it. */
+.folder-browser-folders {
+    display: flex;
+    flex-direction: column;
+    max-height: min(50vh, 400px);
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.folder-browser-folder {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+    .folder-browser-folder:hover {
+        background-color: var(--mud-palette-table-hover);
+    }
+
+    .folder-browser-folder:focus-visible {
+        outline: 2px solid var(--mud-palette-primary);
+        outline-offset: -2px;
+    }
+
+    .folder-browser-folder span {
+        overflow-wrap: anywhere;
+    }
+
+.folder-browser-empty {
+    padding: 8px 12px;
+}

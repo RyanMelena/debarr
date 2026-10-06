@@ -137,6 +137,7 @@ The code holds the mechanism: tables, indexes, triggers, stream operators and ty
 
 - **Root folders.**
   A root folder is a full path to a folder that exists.
+  *Add Root Folder*'s field opens a folder browser over Debarr's filesystem, which lists folders only, leaves hidden folders out, and fills the field without adding the folder.
   No root folder is the same as, inside or contains another, enabled or not, compared by whole path segments on the canonical local path, and a refusal names the other root folder.
   Adding or enabling a root folder runs a library scan, as *Scan Now* does.
   Removing or disabling one returns once the library records it, and a root folder removal then drops its file paths in the background under running work and archives at once every video file it leaves with no path.

@@ -163,6 +163,59 @@ public sealed class LibraryPageTests : PageTestContext
     }
 
     [Fact]
+    public async Task The_folder_browser_opens_at_the_typed_folder_and_puts_the_folder_chosen_in_the_folder_field_without_adding_it()
+    {
+        var root = Directory.CreateTempSubdirectory("debarr-root-");
+        try
+        {
+            var movies = root.CreateSubdirectory("Movies");
+            File.WriteAllText(Path.Combine(root.FullName, "film.mkv"), "");
+            var cut = RenderPage<LibraryPage>();
+            cut.WaitForElement("#library-root-folders-empty", Timeout);
+            await cut.RaiseInputAsync("#library-root-folder-path", root.FullName, Timeout);
+
+            await cut.RaiseClickAsync("button[aria-label='Choose Folder']", Timeout);
+
+            cut.WaitForAssertion(() => Assert.Equal(root.FullName, cut.Find("#folder-browser-path").GetAttribute("value")), Timeout);
+            Assert.Equal(["..", "Movies"], cut.FindAll(".folder-browser-folder").Select(row => row.TextContent.Trim()));
+            await cut.FindAll(".folder-browser-folder").Single(row => row.TextContent.Trim() == "Movies").ClickAsync();
+
+            cut.WaitForAssertion(() => Assert.Equal(movies.FullName, cut.Find("#folder-browser-path").GetAttribute("value")), Timeout);
+            Assert.Equal("This folder holds no folders.", cut.Find("#folder-browser-empty").TextContent.Trim());
+            await cut.RaiseClickAsync("#folder-browser-choose", Timeout);
+
+            cut.WaitForAssertion(() => Assert.Empty(cut.FindAll("#folder-browser-path")), Timeout);
+            Assert.Equal(movies.FullName, cut.Find("#library-root-folder-path").GetAttribute("value"));
+            Assert.Single(cut.FindAll("#library-root-folders-empty"));
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task The_folder_browser_shows_a_typed_folder_it_cannot_find_beneath_its_field_and_chooses_nothing()
+    {
+        var missing = Path.Combine(Path.GetTempPath(), "debarr-missing-folder");
+        var cut = RenderPage<LibraryPage>();
+        cut.WaitForElement("#library-root-folders-empty", Timeout);
+        await cut.RaiseClickAsync("button[aria-label='Choose Folder']", Timeout);
+        cut.WaitForElement("#folder-browser-path", Timeout);
+
+        await cut.RaiseInputAsync("#folder-browser-path", missing, Timeout);
+
+        cut.WaitForAssertion(
+            () => Assert.Contains($"Debarr cannot find the folder {missing}.", cut.Find("#folder-browser-path").Closest(".mud-input-control")!.TextContent),
+            Timeout);
+        Assert.True(cut.Find("#folder-browser-choose").HasAttribute("disabled"));
+        await cut.RaiseClickAsync("#folder-browser-cancel", Timeout);
+
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll("#folder-browser-path")), Timeout);
+        Assert.Equal("", cut.Find("#library-root-folder-path").GetAttribute("value") ?? "");
+    }
+
+    [Fact]
     public async Task A_relative_folder_is_refused_beneath_the_folder_field()
     {
         var cut = RenderPage<LibraryPage>();

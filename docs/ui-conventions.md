@@ -229,6 +229,7 @@ A kind of state with all three takes its word, icon and colour from one table, s
 | Concept | Term on screen |
 |---|---|
 | A folder the library is read from | *Root Folder*, never a bare *root* |
+| Picking a folder from the folders on Debarr's filesystem | *Choose Folder*, and *Choose* in its modal |
 | Reading every root folder | *Library Scan*, and *Scan Now* to start one |
 | Reading one folder that changed | *Folder scan*, in activity messages |
 | How often a library scan runs | *Scan Interval* |
