@@ -1,0 +1,31 @@
+<MudDialog>
+    <DialogContent>
+        <MudTextField T="string" Value="@_typedPath" ValueChanged="SetTypedPath" id="folder-browser-path" Label="Folder"
+                      Error="@(_error is not null)" ErrorText="@_error"
+                      Immediate="true" DebounceInterval="300" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        <div id="folder-browser-folders" class="folder-browser-folders">
+            @if (_listing.CanGoUp)
+            {
+                <button type="button" id="folder-browser-up" class="folder-browser-folder" @onclick="@(() => Show(_listing.Up))">
+                    <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" />
+                    <span>..</span>
+                </button>
+            }
+            @foreach (var subfolder in _listing.Subfolders)
+            {
+                <button type="button" @key="subfolder" class="folder-browser-folder" @onclick="@(() => Show(subfolder))">
+                    <MudIcon Icon="@Icons.Material.Filled.Folder" Size="Size.Small" />
+                    <span>@NameOf(subfolder)</span>
+                </button>
+            }
+            @if (_listing.Subfolders.Count == 0)
+            {
+                <MudText id="folder-browser-empty" Class="folder-browser-empty">This folder holds no folders.</MudText>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton id="folder-browser-cancel" OnClick="Cancel">Cancel</MudButton>
+        <MudButton id="folder-browser-choose" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(ChosenFolder is null)" OnClick="Choose">Choose</MudButton>
+    </DialogActions>
+</MudDialog>

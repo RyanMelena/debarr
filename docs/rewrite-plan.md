@@ -21,6 +21,7 @@ A task's commit marks it done here.
 | M14. Critter Stack audit and M13 follow-ups | 110 to 119 | Done; task 114 changed no code, since Wolverine already checks at startup |
 | M15. Complexity audit | 120 to 127 | Done |
 | M16. Known issues after M15 | 128 | Not started |
+| M17. Folder browser | 129 | Done |
 
 ## Decisions
 
@@ -83,6 +84,7 @@ Every rule has an owner: an aggregate's commands keep its invariants, a value ty
 | **Data directory** | Host | The one directory Debarr writes to, set by `DEBARR__APP__DATADIR` and `/data` by default. It holds `config.json`, the database `debarr.db`, the Data Protection keys in `keys/` and the log files in `logs/`. |
 | **Library** | Aggregate | The root folders, and how Debarr scans them: the video extensions, the scan interval and whether it watches folders, and the root folders removed, whose file paths a cut-short removal can leave. |
 | **Root folder** | Entity of the library | A folder the operator adds, as Debarr sees it; library scans read everything under it. No root folder is the same as, inside or contains another, enabled or not, compared by whole path segments on the canonical local path. Each holds when a scan last covered it and that scan's error, such as a missing folder. Removing or disabling one archives every video file it leaves with no path. |
+| **Folder browser** | UI: a modal | Lists the folders on Debarr's filesystem, from the drives on Windows or `/` elsewhere, so the operator picks a root folder rather than typing its path. |
 | **Video extensions** | Value type in the library | The extensions that make a file a video file: an editable list, `mkv mp4 m4v avi mov ts m2ts wmv webm mpg mpeg` by default, stored lowercase with no leading dot. |
 | **Library scan** | Process | One pass over every enabled root folder that brings the library's file paths in line with the disk, hashing new and changed files, and records a library scan summary. It runs at startup, every scan interval, on *Scan Now*, and when a root folder is added or enabled. Library scans and folder scans never overlap. |
 | **Folder scan** | Process | A scan of one folder under a root folder, after its files change, when watching folders. It records nothing on the root folder. |
@@ -539,3 +541,13 @@ The order puts the one-file tasks first, task 121 before task 125, which edits t
      A watcher whose root folder goes missing, such as an unmounted share, stops for good, and today only a library settings save or a restart watches the root folder again.
      A library scan that finds an enabled root folder present and unwatched, while watching folders is on, starts its watcher, and *Watch folders* in [domain-model.md](domain-model.md) says so in the same commit.
      A test removes a root folder, creates it again, runs a library scan, and finds a change in it schedules a folder scan.
+
+### M17. Folder browser
+
+129. **A folder browser for *Add Root Folder*.**
+     *Add Root Folder*'s field on *Settings > Library* gains a folder button that opens the folder browser, as Radarr's does, from the typed folder when it exists and from the top otherwise.
+     `FolderListing` in `Scanning/` reads one folder's visible direct subfolders, sorted by name ignoring case, or the top: the ready drives on Windows, and `/` elsewhere, so a Docker mount such as `/media` shows at once.
+     A folder Debarr cannot find or read is a failure that names it.
+     `FolderBrowserDialog` lists the folder with a *..* row while a listing sits above it, lists the folder typed in its field, shows a typed path it cannot list beneath the field, and closes with the folder on *Choose*.
+     `IDialogService.ChooseFolderAsync` opens it, and the chosen folder fills the field without adding it, so *Add Root Folder* still refuses an overlapping folder beneath the field.
+     `FolderListingTests` checks the listing on a temporary folder, and two `LibraryPageTests` choose a folder and type one that is missing.

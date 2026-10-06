@@ -81,6 +81,7 @@ else
                     <div class="d-flex gap-2 align-start">
                         <MudTextField T="string" Class="flex-grow-1" Value="@_newRootFolderPath" ValueChanged="SetNewRootFolderPath" id="library-root-folder-path" Label="Folder"
                                       Error="@(NewRootFolderError is not null)" ErrorText="@NewRootFolderError"
+                                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.FolderOpen" AdornmentAriaLabel="Choose Folder" OnAdornmentClick="ChooseRootFolderAsync"
                                       Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
                         <MudButton id="library-add-root" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add"
                                    Class="mt-2 flex-none" OnClick="AddRootFolderAsync" Disabled="@(Busy || string.IsNullOrWhiteSpace(_newRootFolderPath))">Add Root Folder</MudButton>
