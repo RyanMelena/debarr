@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageVersion Include="bunit" Version="2.11.3" />
     <PackageVersion Include="CliWrap" Version="3.10.5" />
-    <PackageVersion Include="Fisher" Version="1.14.0" />
+    <PackageVersion Include="Fisher" Version="1.19.0" />
     <PackageVersion Include="FluentResults" Version="4.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
@@ -22,7 +22,7 @@
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="StreamJsonRpc" Version="2.25.29" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />
-    <PackageVersion Include="WolverineFx.Fisher" Version="6.43.0" />
+    <PackageVersion Include="WolverineFx.Fisher" Version="6.46.0" />
     <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.43.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.1" />
   </ItemGroup>
