@@ -26,6 +26,7 @@
 
   <!-- Release builds run the pre-generated handlers, so only Debug carries the runtime compiler. -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="WolverineFx.RuntimeCompilation" />
   </ItemGroup>
 
