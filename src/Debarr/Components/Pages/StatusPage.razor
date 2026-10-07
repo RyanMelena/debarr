@@ -77,6 +77,10 @@
                                     {
                                         <RootFolderRemovalText StartedAt="removal.StartedAt" />
                                     }
+                                    else if (row.Scanning)
+                                    {
+                                        <StateLabel Icon="@Icons.Material.Outlined.Sync" Color="Color.Info">Scanning</StateLabel>
+                                    }
                                     else
                                     {
                                         <LastScanText Scan="LastScanText.Of(row.LastScan)" />

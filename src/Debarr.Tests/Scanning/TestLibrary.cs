@@ -8,7 +8,7 @@ namespace Debarr.Tests.Scanning;
 public static class TestLibrary
 {
     /// <summary>
-    /// Adds a root folder at <paramref name="path"/>, disabled when asked, with a library scan that started at <paramref name="scannedAt"/> when one is given.
+    /// Adds a root folder at <paramref name="path"/>, disabled when asked, with a finished library scan that started at <paramref name="scannedAt"/> when one is given.
     /// It was added at <paramref name="addedAt"/>, or at the Unix epoch, before every scan.
     /// </summary>
     public static async Task AddRootFolderAsync(
@@ -30,7 +30,7 @@ public static class TestLibrary
         await AppendAsync(store, events, cancellationToken);
         if (scannedAt is { } startedAt)
         {
-            await AppendLibraryScanAsync(store, Guid.CreateVersion7(), [new LibraryScanStarted(startedAt), new RootFolderScanned(rootFolder, startedAt, scanError)], cancellationToken);
+            await AppendLibraryScanAsync(store, Guid.CreateVersion7(), [new LibraryScanStarted(startedAt), new RootFolderScanned(rootFolder, startedAt, scanError), new LibraryScanEnded(startedAt, new LibraryScanCounts(0, 0, 0, 0, 0), new LibraryScanOutcome.Finished())], cancellationToken);
         }
     }
 

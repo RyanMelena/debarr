@@ -53,7 +53,7 @@ else
             <dt>@(IsManual ? "Result" : "Ratio")</dt>
             <dd id="@(IsManual ? "video-file-detected" : "video-file-ratio")">@Snap(rawAspectRatio).Value.ToAspectRatioText() <span class="mud-text-secondary">(@rawAspectRatio.ToRawAspectRatioText() raw)</span></dd>
             <dt>Source</dt>
-            <dd id="video-file-source">@SourceText(detectionResult)</dd>
+            <dd id="video-file-source">@SourceText(detectionResult, _videoFile.CurrentResult.ContainerMetadata)</dd>
             <dt>Confidence</dt>
             <dd id="video-file-confidence">
                 @detectionResult.Confidence.ToPercentText()

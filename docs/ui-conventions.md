@@ -86,6 +86,7 @@ A new page uses the shared components below rather than repeating their markup.
 - Work that runs longer than a click shows beside the control that started it: the control reads what is happening with a spinner, such as *Scanning*, and stays disabled until the work ends.
   A row whose work runs says so in its status, such as *Detecting* on Media, with how long it has run on the same line, so the row keeps its height.
   A root folder whose removal runs keeps its row on *Settings > Library* and *System > Status*, reading *Removing* where its last scan shows, until the removal ends, and *System > Tasks* lists the removal.
+  A root folder the running library scan has still to finish reads *Scanning* there instead, until the scan finishes it.
 - A disabled action says why where the operator sees it: in its tooltip and its accessible name, and on a card, since a touch screen has no tooltip, in its label, such as *Detect Now Busy*.
 - The navigation lists the running work, a library scan, a root folder removal and the running detections, above the activity messages.
   While the navigation is closed, as it is on a phone, the app bar sums the running work up in one line that opens it.
