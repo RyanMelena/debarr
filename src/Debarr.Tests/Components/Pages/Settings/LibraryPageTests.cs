@@ -31,6 +31,24 @@ public sealed class LibraryPageTests : PageTestContext
     }
 
     [Fact]
+    public async Task A_root_the_running_library_scan_has_still_to_finish_shows_scanning()
+    {
+        var store = GetAppService<IDocumentStore>();
+        var scanned = Path.Combine(Path.GetTempPath(), "debarr-scanned");
+        await TestLibrary.AddRootFolderAsync(store, scanned, CancellationToken);
+        await TestLibrary.AddRootFolderAsync(store, Path.Combine(Path.GetTempPath(), "debarr-waiting"), CancellationToken);
+        var startedAt = DateTimeOffset.UtcNow;
+        await TestLibrary.AppendLibraryScanAsync(store, Guid.CreateVersion7(), [new LibraryScanStarted(startedAt), new RootFolderScanned(new LocalPath(scanned), startedAt, null)], CancellationToken);
+
+        var cut = RenderPage<LibraryPage>();
+
+        cut.WaitForAssertion(() => Assert.Equal(2, cut.FindAll(".library-root-folder-last-scan").Count), Timeout);
+        var lastScans = cut.FindAll(".library-root-folder-last-scan").Select(cell => cell.TextContent.Trim()).ToList();
+        Assert.NotEqual("Scanning", lastScans[0]);
+        Assert.Equal("Scanning", lastScans[1]);
+    }
+
+    [Fact]
     public async Task The_page_reloads_when_a_commit_changes_a_root_folder_its_scan_or_its_file_paths()
     {
         var store = GetAppService<IDocumentStore>();

@@ -90,14 +90,16 @@ public static class LibraryScanSummaryRowQuery
             .OrderByDescending(row => row.StartedAt);
 
     /// <summary>
-    /// The library's root folders in path order, each with the newest library scan that covered it since it was added; null until one does.
+    /// The library's root folders in path order, each with the newest library scan that covered it since it was added, null until one does,
+    /// and whether the running library scan has it still to finish: an enabled root folder added before that scan started.
     /// </summary>
-    public static async Task<IReadOnlyList<(RootFolder RootFolder, RootFolderScanned? LastScan)>> ReadRootFoldersAsync(
+    public static async Task<IReadOnlyList<(RootFolder RootFolder, RootFolderScanned? LastScan, bool Scanning)>> ReadRootFoldersAsync(
         this IQuerySession session,
         CancellationToken cancellationToken)
     {
         var library = await Library.ReadAsync(session, cancellationToken);
-        var rootFolders = new List<(RootFolder, RootFolderScanned?)>(library.RootFolders.Count);
+        var openScan = await session.ReadOpenLibraryScanAsync(cancellationToken);
+        var rootFolders = new List<(RootFolder, RootFolderScanned?, bool)>(library.RootFolders.Count);
         foreach (var rootFolder in library.RootFolders)
         {
             var path = rootFolder.Path.Value;
@@ -106,7 +108,14 @@ public static class LibraryScanSummaryRowQuery
                 .Where(row => row.StartedAt >= addedAt && row.RootFolders.Any(scanned => scanned.Path == path))
                 .OrderByDescending(row => row.StartedAt)
                 .FirstOrDefaultAsync(cancellationToken);
-            rootFolders.Add((rootFolder, lastScan is null ? null : new RootFolderScanned(rootFolder.Path, lastScan.StartedAt, lastScan.RootFolders.Last(scanned => scanned.Path == path).Error)));
+            var scanning = rootFolder.Enabled
+                && openScan is not null
+                && openScan.StartedAt >= addedAt
+                && openScan.RootFolders.All(scanned => scanned.Path != path);
+            rootFolders.Add((
+                rootFolder,
+                lastScan is null ? null : new RootFolderScanned(rootFolder.Path, lastScan.StartedAt, lastScan.RootFolders.Last(scanned => scanned.Path == path).Error),
+                scanning));
         }
 
         return rootFolders;

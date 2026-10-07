@@ -100,6 +100,23 @@ public sealed class LibraryScanSummaryRowTests : AppTestContext
     }
 
     [Fact]
+    public async Task The_running_library_scan_marks_scanning_each_enabled_root_folder_it_has_still_to_finish()
+    {
+        var other = new LocalPath(Path.Combine(Path.GetTempPath(), "debarr-videos"));
+        var disabled = new LocalPath(Path.Combine(Path.GetTempPath(), "debarr-home"));
+        await AppendLibraryAsync(new RootFolderAdded(disabled, AddedAt), new RootFolderDisabled(disabled), new RootFolderAdded(Movies, AddedAt), new RootFolderAdded(Shows, AddedAt));
+        var running = Guid.CreateVersion7();
+        await TestLibrary.AppendLibraryScanAsync(Store, running, [new LibraryScanStarted(ScannedAt), new RootFolderScanned(Movies, ScannedAt, null)], CancellationToken);
+        await AppendLibraryAsync(new RootFolderAdded(other, ScannedAt.AddSeconds(1)));
+
+        Assert.Equal([(disabled, false), (Movies, false), (Shows, true), (other, false)], await ReadScanningAsync());
+
+        await TestLibrary.AppendLibraryScanAsync(Store, running, [new LibraryScanEnded(ScannedAt.AddMinutes(1), Counts, new LibraryScanOutcome.Finished())], CancellationToken);
+
+        Assert.Equal([(disabled, false), (Movies, false), (Shows, false), (other, false)], await ReadScanningAsync());
+    }
+
+    [Fact]
     public async Task A_removed_root_folder_reads_no_more_and_comes_back_unscanned_when_added_again()
     {
         await AppendLibraryAsync(new RootFolderAdded(Movies, AddedAt));
@@ -166,6 +183,12 @@ public sealed class LibraryScanSummaryRowTests : AppTestContext
         await using var session = Store.QuerySession();
         return [.. (await session.ReadRootFoldersAsync(CancellationToken))
             .Select(root => (root.RootFolder.Path, root.RootFolder.Enabled, root.LastScan?.StartedAt, root.LastScan?.Error))];
+    }
+
+    private async Task<List<(LocalPath Path, bool Scanning)>> ReadScanningAsync()
+    {
+        await using var session = Store.QuerySession();
+        return [.. (await session.ReadRootFoldersAsync(CancellationToken)).Select(root => (root.RootFolder.Path, root.Scanning))];
     }
 
     private sealed record Summary(
