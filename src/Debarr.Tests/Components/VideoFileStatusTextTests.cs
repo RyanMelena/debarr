@@ -30,6 +30,17 @@ public sealed class VideoFileStatusTextTests : BunitContext
         Assert.Equal(name, label.TextContent.Trim());
     }
 
+    [Theory]
+    [InlineData(VideoFileStatus.Detected, "Measured from the picture. A playback sends this ratio.")]
+    [InlineData(VideoFileStatus.FromFile, "The ratio the file states, accepted without measuring the picture. A playback sends this ratio.")]
+    [InlineData(VideoFileStatus.Manual, "Set by an override. A playback sends the override's ratio, or nothing for Don't Send.")]
+    [InlineData(VideoFileStatus.Failed, "The last detection failed. A playback sends the player's ratio.")]
+    [InlineData(VideoFileStatus.Pending, "Waiting for detection. A playback sends the player's ratio.")]
+    public void Each_status_explains_what_it_means_then_what_a_playback_sends(VideoFileStatus status, string explanation)
+    {
+        Assert.Equal(explanation, VideoFileStatusText.Explain(status));
+    }
+
     [Fact]
     public void Each_status_has_its_own_icon()
     {

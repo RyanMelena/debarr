@@ -89,7 +89,9 @@ else
                         @if (running is null && context.LastFailure is { } lastFailure)
                         {
                             var failure = DetectionFailureExplanation.FromError(lastFailure.Error, context.FilePaths[0].Path.Value);
-                            <div class="media-error mud-text-secondary" title="@failure.ToTooltipText()">@failure.Summary</div>
+                            <MudTooltip Text="@failure.ToTooltipText()">
+                                <div class="media-error mud-text-secondary">@failure.Summary</div>
+                            </MudTooltip>
                         }
                     </div>
                 </MudTd>

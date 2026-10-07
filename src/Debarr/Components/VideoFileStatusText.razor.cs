@@ -22,13 +22,22 @@ public partial class VideoFileStatusText
     public bool ShowsExplanation { get; set; } = true;
 
     /// <summary>What the status means and what a playback of the file sends.</summary>
-    public static string Explain(VideoFileStatus status) => status switch
+    public static string Explain(VideoFileStatus status) => $"{Meaning(status)} {Sends(status)}";
+
+    private static string Meaning(VideoFileStatus status) => status switch
     {
-        VideoFileStatus.Detected => "Measured from the picture. A playback sends this ratio.",
-        VideoFileStatus.FromFile => "The ratio the file states, accepted without measuring the picture. A playback sends it.",
-        VideoFileStatus.Manual => "An override sets what a playback sends.",
-        VideoFileStatus.Failed => "The last detection failed. A playback sends the player's ratio.",
-        _ => "Waiting for detection. A playback sends the player's ratio.",
+        VideoFileStatus.Detected => "Measured from the picture.",
+        VideoFileStatus.FromFile => "The ratio the file states, accepted without measuring the picture.",
+        VideoFileStatus.Manual => "Set by an override.",
+        VideoFileStatus.Failed => "The last detection failed.",
+        _ => "Waiting for detection.",
+    };
+
+    private static string Sends(VideoFileStatus status) => status switch
+    {
+        VideoFileStatus.Detected or VideoFileStatus.FromFile => "A playback sends this ratio.",
+        VideoFileStatus.Manual => "A playback sends the override's ratio, or nothing for Don't Send.",
+        _ => "A playback sends the player's ratio.",
     };
 
     /// <summary>The word, icon and colour each status has on every page.</summary>
@@ -47,7 +56,7 @@ public partial class VideoFileStatusText
     private string Explanation => Running switch
     {
         null => Explain(Status),
-        { Origin: DetectionOrigin.DetectNow } => "Detect Now is measuring this file. Its status shows once it ends.",
-        _ => "The queue is measuring this file. Its status shows once it ends.",
+        { Origin: DetectionOrigin.DetectNow } => $"Detect Now is measuring this file. Its status shows once it ends. {Sends(Status)}",
+        _ => $"The queue is measuring this file. Its status shows once it ends. {Sends(Status)}",
     };
 }
