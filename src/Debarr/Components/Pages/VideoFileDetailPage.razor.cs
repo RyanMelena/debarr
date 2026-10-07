@@ -169,12 +169,24 @@ public partial class VideoFileDetailPage(IDocumentStore store, DetectionOrchestr
 
     private SnappedAspectRatio Snap(double rawAspectRatio) => _standardRatios.Snap(new AspectRatio(rawAspectRatio));
 
-    private static string SourceText(DetectionResult detectionResult) => detectionResult.AspectRatioSource switch
+    /// <summary>The result's source, and the container ratio's match that decided whether the picture was measured, when the detection read the container.</summary>
+    private string SourceText(DetectionResult detectionResult, ContainerMetadata? containerMetadata)
     {
-        AspectRatioSource.Detected => "Detected, measured from the picture",
-        AspectRatioSource.FromFile => "From File, the ratio the file states",
-        _ => "",
-    };
+        var containerAspectRatio = containerMetadata?.ContainerAspectRatio.Value;
+        var snapped = containerAspectRatio is { } raw ? Snap(raw) : null;
+        return (detectionResult.AspectRatioSource, snapped) switch
+        {
+            (AspectRatioSource.Detected, { ChecksPicture: true, Value: var match }) =>
+                $"Detected, measured from the picture because the container ratio {containerAspectRatio!.Value.ToRawAspectRatioText()} matches {match.ToAspectRatioText()}, which is marked Check Picture",
+            (AspectRatioSource.Detected, _) => "Detected, measured from the picture",
+            (AspectRatioSource.FromFile, { ChecksPicture: false, Match: null }) =>
+                $"From File, the ratio the file states, since the container ratio {containerAspectRatio!.Value.ToRawAspectRatioText()} matches no standard ratio",
+            (AspectRatioSource.FromFile, { ChecksPicture: false, Value: var match }) =>
+                $"From File, the ratio the file states, since {match.ToAspectRatioText()} is not marked Check Picture",
+            (AspectRatioSource.FromFile, _) => "From File, the ratio the file states",
+            _ => "",
+        };
+    }
 
     private string ConfidenceText(DetectionResult detectionResult) => detectionResult.AspectRatioSource switch
     {

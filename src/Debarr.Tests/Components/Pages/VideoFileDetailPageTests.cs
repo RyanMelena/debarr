@@ -214,6 +214,20 @@ public sealed class VideoFileDetailPageTests : PageTestContext
         StackedTableAssert.EachCellIsLabelledByItsColumn(cut.Find("#video-file-detections"));
     }
 
+    [Theory]
+    [InlineData(2.353, AspectRatioSource.Detected, 1.778, "Detected, measured from the picture because the container ratio 1.778 matches 1.78, which is marked Check Picture")]
+    [InlineData(2.391, AspectRatioSource.FromFile, 2.391, "From File, the ratio the file states, since 2.39 is not marked Check Picture")]
+    [InlineData(2.12, AspectRatioSource.FromFile, 2.12, "From File, the ratio the file states, since the container ratio 2.120 matches no standard ratio")]
+    public async Task The_source_says_why_the_picture_was_or_was_not_measured(double rawAspectRatio, AspectRatioSource source, double containerAspectRatio, string sourceText)
+    {
+        var (videoFile, _) = await SeedVideoFileAsync("/media/film.mkv", rawAspectRatio);
+        await AppendToVideoFileAsync(videoFile, new AspectRatioDetected(videoFile, TestVideoFile.Detected(rawAspectRatio, source, containerAspectRatio: containerAspectRatio)));
+
+        var cut = RenderPage<VideoFileDetailPage>(parameters: new Dictionary<string, object?> { ["Hash"] = videoFile.Value });
+
+        cut.WaitForAssertion(() => Assert.Equal(sourceText, cut.Find("#video-file-source").TextContent.Trim()), Timeout);
+    }
+
     [Fact]
     public async Task Samples_that_differ_from_the_agreeing_ones_are_marked_and_the_agreement_is_counted()
     {
