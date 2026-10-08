@@ -112,7 +112,7 @@ public sealed class PlayerConnectionServiceTests : IAsyncLifetime
 
         await using (var session = _host.Store.LightweightSession())
         {
-            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerChanged(theaterId, true, KodiEndpoint.Create("127.0.0.1", _theater.Port, 60, 10).Value, []));
+            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerChanged(theaterId, true, KodiEndpoint.Create("127.0.0.1", _theater.Port, 60, 10).Value, [], []));
             await session.SaveChangesAsync(CancellationToken);
         }
 
@@ -231,7 +231,7 @@ public sealed class PlayerConnectionServiceTests : IAsyncLifetime
 
     private async Task<Guid> SavePlayerAsync(string name, int port, bool enabled, Guid? id = null)
     {
-        var command = new SavePlayer(id ?? Guid.NewGuid(), name, enabled, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, []);
+        var command = new SavePlayer(id ?? Guid.NewGuid(), name, enabled, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, [], []);
         Assert.True((await _host.Runtime.SendCommandAsync(command, CancellationToken)).IsSuccess);
         return command.PlayerId;
     }

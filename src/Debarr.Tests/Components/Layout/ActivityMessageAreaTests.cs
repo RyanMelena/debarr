@@ -71,7 +71,7 @@ public class ActivityMessageAreaTests : BunitContext
         _source.OnNext(Committed(new RootFolderDisabled(new LocalPath("/media"))));
         _source.OnNext(Committed(new LibrarySettingsChanged(Library.Default.Settings)));
         _source.OnNext(Committed(new DetectionSettingsChanged(3, DetectionSettings.Default.PictureMeasurement, 600)));
-        _source.OnNext(Committed(new PlayerAdded(playerId, "Theater", true, KodiEndpoint.Create("kodi.lan", 9090, 60, 10).Value, [])));
+        _source.OnNext(Committed(new PlayerAdded(playerId, "Theater", true, KodiEndpoint.Create("kodi.lan", 9090, 60, 10).Value, [], [])));
         _source.OnNext(Committed(new PlayerRenamed(playerId, "Lounge")));
         _source.OnNext(Committed(new PlayerRemoved(playerId)));
         _source.OnNext(Committed(new NotifierRenamed(Guid.NewGuid(), "Broker")));

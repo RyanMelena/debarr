@@ -22,6 +22,7 @@ A task's commit marks it done here.
 | M15. Complexity audit | 120 to 127 | Done |
 | M16. Known issues after M15 | 128 | Not started |
 | M17. Folder browser | 129 | Done |
+| M18. Excluded paths | 130 | Done |
 
 ## Decisions
 
@@ -152,12 +153,13 @@ Every rule has an owner: an aggregate's commands keep its invariants, a value ty
 | Name | Role | Meaning |
 |---|---|---|
 | **Players** | Aggregate | Every player, and the players removed, so each player's name is unique among them. |
-| **Player** | Entity of the players | A media player Debarr connects to, which reports playback started events: its unique name, its player endpoint, and its path mappings. Debarr never starts or stops a player. |
+| **Player** | Entity of the players | A media player Debarr connects to, which reports playback started events: its unique name, its player endpoint, its path mappings and its excluded paths. Debarr never starts or stops a player. |
 | **Player endpoint** | Value type in a player | Where a player listens and how its requests are timed, such as a Kodi endpoint's host, port, ping interval and request timeout. Its type is the player's type (Kodi for now), it canonicalises the player paths of that type, and it holds only values within their bounds. |
 | **Player connection** | Runtime state | Debarr's live link to one enabled player: it connects, reconnects with backoff, pings, and reports its state and the player's playback started events. Its state is Connecting, Connected or Disconnected, each with when it began; through its retries it stays Disconnected with when it was lost and the latest error. |
 | **Player path** | Value type | A path as a player reports it, canonicalised by that player type's rules. |
 | **Local path** | Value type | A path as Debarr's filesystem sees it. Root folders and file paths are local paths, and so is a translated player path. |
 | **Path mapping** | Value type in a player | A player path and a local path. A player path translates by the longest path mapping whose player path it starts with, and one no path mapping matches is used unchanged. |
+| **Excluded path** | Value type in a player | A player path whose playback Debarr ignores, for private content. It wins over a path mapping when it covers a path by more whole segments, so a folder inside a mapped share can be excluded. *Settings > Players* shows a player's excluded paths with Show Advanced on, or while it has any. |
 | **Path mapping entry** | Value type in *Save Player* | A path mapping as the operator entered it, before its player path is canonicalised by the player type's rules. |
 | **Playback started event** | Input | A player's report that it started playing a file: the player, the player path, the player-reported ratio, the title and the time. |
 | **Stream** | Value type: a kind of player path | A playback whose player path starts with `plugin://` or `pvr://`, such as an add-on or live TV. It has no file under a root folder, so it sends nothing and says so. |
@@ -551,3 +553,11 @@ The order puts the one-file tasks first, task 121 before task 125, which edits t
      `FolderBrowserDialog` lists the folder with a *..* row while a listing sits above it, lists the folder typed in its field, shows a typed path it cannot list beneath the field, and closes with the folder on *Choose*.
      `IDialogService.ChooseFolderAsync` opens it, and the chosen folder fills the field without adding it, so *Add Root Folder* still refuses an overlapping folder beneath the field.
      `FolderListingTests` checks the listing on a temporary folder, and two `LibraryPageTests` choose a folder and type one that is missing.
+
+### M18. Excluded paths
+
+130. **Excluded paths for private content.**
+     A player gains excluded paths beside its path mappings, saved by *Save Player* and stored on `PlayerAdded` and `PlayerChanged`, where an event stored before them reads as none.
+     A player connection reports no playback of a path the player excludes, judged by the longest covering player path among its path mappings and excluded paths, and logs `{Player} played an excluded path, so its playback was ignored.` with no path or title.
+     The Kodi modal shows *Excluded Paths* with Show Advanced on, or while the player has any, and the player's card counts them.
+     `PlayerTests`, `SavePlayerTests`, `KodiPlayerConnectionTests` and `AggregateReadTests` check the rule, the refusals, the dropped playback and an event with no excluded paths.

@@ -26,12 +26,22 @@ public partial class PlayersPage(IDocumentStore store, IDialogService dialogServ
         _players = [.. (await Players.ReadAsync(session, cancellationToken)).All.OrderBy(player => player.Name, StringComparer.Ordinal)];
     }
 
-    private static string PathMappingsText(Player player) => player.PathMappings.Count switch
+    /// <summary>How many path mappings the player has, and how many excluded paths when it has any.</summary>
+    private static string PathsText(Player player)
     {
-        0 => "No path mappings",
-        1 => "1 path mapping",
-        var count => $"{count} path mappings",
-    };
+        var pathMappings = player.PathMappings.Count switch
+        {
+            0 => "No path mappings",
+            1 => "1 path mapping",
+            var count => $"{count} path mappings",
+        };
+        return player.ExcludedPaths.Count switch
+        {
+            0 => pathMappings,
+            1 => $"{pathMappings}, 1 excluded path",
+            var count => $"{pathMappings}, {count} excluded paths",
+        };
+    }
 
     /// <summary>The state of an enabled player's connection; null while the player is disabled, and until its connection enters a state.</summary>
     private PlayerConnectionState? StateOf(Player player) =>

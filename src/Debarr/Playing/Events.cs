@@ -3,9 +3,11 @@ using Debarr.Scanning;
 
 namespace Debarr.Playing;
 
-public sealed record PlayerAdded(Guid PlayerId, string Name, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings);
+/// <param name="ExcludedPaths">Null in an event stored before players had excluded paths.</param>
+public sealed record PlayerAdded(Guid PlayerId, string Name, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings, IReadOnlyList<PlayerPath>? ExcludedPaths);
 
-public sealed record PlayerChanged(Guid PlayerId, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings);
+/// <param name="ExcludedPaths">Null in an event stored before players had excluded paths.</param>
+public sealed record PlayerChanged(Guid PlayerId, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings, IReadOnlyList<PlayerPath>? ExcludedPaths);
 
 public sealed record PlayerRenamed(Guid PlayerId, string Name);
 
