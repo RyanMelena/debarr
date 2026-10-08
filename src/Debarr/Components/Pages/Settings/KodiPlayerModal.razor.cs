@@ -27,7 +27,7 @@ public partial class KodiPlayerModal(IDocumentStore store, IWolverineRuntime run
 
     protected override string RemoveTitle => "Remove Player";
 
-    protected override string RemoveMessage => $"Remove the player {Form.Name}? Its connection closes and its path mappings go with it.";
+    protected override string RemoveMessage => $"Remove the player {Form.Name}? Its connection closes and its path mappings and excluded paths go with it.";
 
     protected override void OnInitialized()
     {
@@ -55,6 +55,20 @@ public partial class KodiPlayerModal(IDocumentStore store, IWolverineRuntime run
     private string PathMappingField(PathMappingForm pathMapping, string path) =>
         SavePlayer.PathMappingField(Form.PathMappings.IndexOf(pathMapping), path);
 
+    /// <summary>Whether the excluded paths show: with Show Advanced on, or while the player has any, so an excluded path in effect stays in sight.</summary>
+    private bool ShowsExcludedPaths => ShowAdvanced.Shown || Form.ExcludedPaths.Count > 0;
+
+    private void AddExcludedPath() => Form.ExcludedPaths.Add(new ExcludedPathForm());
+
+    private void RemoveExcludedPath(ExcludedPathForm excludedPath)
+    {
+        Form.ExcludedPaths.Remove(excludedPath);
+        ModalAction.ClearRowFieldErrors(nameof(SavePlayer.ExcludedPaths));
+    }
+
+    private string ExcludedPathField(ExcludedPathForm excludedPath) =>
+        SavePlayer.ExcludedPathField(Form.ExcludedPaths.IndexOf(excludedPath));
+
     protected override async Task<Result> ValidateIntegrationAsync(CancellationToken cancellationToken)
     {
         var players = await ReadPlayersAsync(cancellationToken);
@@ -65,7 +79,7 @@ public partial class KodiPlayerModal(IDocumentStore store, IWolverineRuntime run
     protected override async Task<(bool Succeeded, string? Message)> TestIntegrationAsync(CancellationToken cancellationToken)
     {
         var command = Form.ToSavePlayer(Players.Empty).Value;
-        var player = new Player(command.PlayerId, command.Name, command.Enabled, command.Endpoint, []);
+        var player = new Player(command.PlayerId, command.Name, command.Enabled, command.Endpoint, [], []);
         var test = await playerConnectionFactory.TestAsync(player, cancellationToken);
         return test.IsSuccess ? (true, $"Connected to {test.Value}") : (false, test.GetFormError());
     }

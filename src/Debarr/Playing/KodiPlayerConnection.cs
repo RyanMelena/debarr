@@ -163,7 +163,7 @@ public sealed partial class KodiPlayerConnection
         }
     }
 
-    /// <summary>The playback started event for the item the player plays; null when no video player is active or the item has no file.</summary>
+    /// <summary>The playback started event for the item the player plays; null when no video player is active, the item has no file, or the player excludes its path.</summary>
     private async Task<PlaybackStartedEvent?> ReadPlaybackStartedAsync(JsonRpc rpc, int? playerId, DateTimeOffset occurredAt, CancellationToken cancellationToken)
     {
         if ((playerId ?? await FindVideoPlayerIdAsync(rpc, cancellationToken)) is not { } videoPlayerId)
@@ -184,7 +184,14 @@ public sealed partial class KodiPlayerConnection
             return null;
         }
 
-        return new PlaybackStartedEvent(_player.Id, _player.Name, _endpoint.ToPlayerPath(file), GetAspectRatio(item), GetTitle(item), occurredAt);
+        var playerPath = _endpoint.ToPlayerPath(file);
+        if (_player.Excludes(playerPath))
+        {
+            LogExcludedPlaybackIgnored(_player.Name);
+            return null;
+        }
+
+        return new PlaybackStartedEvent(_player.Id, _player.Name, playerPath, GetAspectRatio(item), GetTitle(item), occurredAt);
     }
 
     /// <summary>The active video player's id, or null when none is active.</summary>
@@ -324,4 +331,7 @@ public sealed partial class KodiPlayerConnection
 
     [LoggerMessage(LogLevel.Debug, "{Player} reported playback of an item with no file.")]
     private partial void LogItemWithNoFile(string player);
+
+    [LoggerMessage(LogLevel.Information, "{Player} played an excluded path, so its playback was ignored.")]
+    private partial void LogExcludedPlaybackIgnored(string player);
 }

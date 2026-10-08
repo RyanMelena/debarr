@@ -12,14 +12,12 @@ public sealed record PathMapping(PlayerPath PlayerPath, LocalPath LocalPath)
     /// </summary>
     public LocalPath? Translate(PlayerPath path)
     {
-        // A player path of "/" trims to "", which covers every absolute path.
-        var prefix = PlayerPath.Value.TrimEnd('/');
-        if (!path.Value.StartsWith(prefix, StringComparison.Ordinal)
-            || (path.Value.Length > prefix.Length && path.Value[prefix.Length] != '/'))
+        if (!PlayerPath.Covers(path))
         {
             return null;
         }
 
+        var prefix = PlayerPath.Value.TrimEnd('/');
         return new LocalPath(LocalPath.Value.TrimEnd('/', Path.DirectorySeparatorChar) + path.Value[prefix.Length..].Replace('/', Path.DirectorySeparatorChar));
     }
 }

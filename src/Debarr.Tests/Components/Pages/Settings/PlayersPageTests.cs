@@ -29,7 +29,7 @@ public sealed class PlayersPageTests : PageTestContext
 
         await using (var session = GetAppService<IDocumentStore>().LightweightSession())
         {
-            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, []));
+            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, [], []));
             await session.SaveChangesAsync(CancellationToken);
         }
 
@@ -41,7 +41,7 @@ public sealed class PlayersPageTests : PageTestContext
     public async Task A_disconnected_player_shows_its_error_on_its_card_and_as_an_error_alert_in_its_modal()
     {
         var saved = await GetAppService<IWolverineRuntime>().SendCommandAsync(
-            new SavePlayer(Guid.NewGuid(), "Bedroom", true, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, []),
+            new SavePlayer(Guid.NewGuid(), "Bedroom", true, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, [], []),
             CancellationToken);
         Assert.True(saved.IsSuccess);
 
@@ -85,7 +85,7 @@ public sealed class PlayersPageTests : PageTestContext
     public async Task A_refused_name_shows_beneath_the_name_field_keeps_the_edits_and_clears_once_the_name_changes()
     {
         var saved = await GetAppService<IWolverineRuntime>().SendCommandAsync(
-            new SavePlayer(Guid.NewGuid(), "Theater", false, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, []),
+            new SavePlayer(Guid.NewGuid(), "Theater", false, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, [], []),
             CancellationToken);
         Assert.True(saved.IsSuccess);
         var cut = RenderPage<PlayersPage>();
@@ -244,7 +244,7 @@ public sealed class PlayersPageTests : PageTestContext
 
     private async Task SaveTheaterAsync() =>
         Assert.True((await GetAppService<IWolverineRuntime>().SendCommandAsync(
-            new SavePlayer(Guid.NewGuid(), "Theater", false, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, []),
+            new SavePlayer(Guid.NewGuid(), "Theater", false, KodiEndpoint.Create("127.0.0.1", ClosedPort(), 60, 10).Value, [], []),
             CancellationToken)).IsSuccess);
 
     /// <summary>The Name field's control, which holds its helper and error text.</summary>

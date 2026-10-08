@@ -63,4 +63,28 @@
     }
 
     <MudButton id="kodi-add-path-mapping" StartIcon="@Icons.Material.Filled.Add" Class="mt-2" OnClick="AddPathMapping">Add Path Mapping</MudButton>
+
+    @if (ShowsExcludedPaths)
+    {
+        <MudText Typo="Typo.subtitle2" Class="mt-5">Excluded Paths</MudText>
+        <div>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                A path the player reports that starts with an excluded path is ignored: Debarr records nothing, logs no path or title, and sends no notification.
+                The longest match among the path mappings and excluded paths wins.
+            </MudText>
+        </div>
+
+        @foreach (var excludedPath in Form.ExcludedPaths)
+        {
+            <div class="d-flex align-start gap-2 mt-2" @key="excludedPath">
+                <MudTextField @bind-Value="excludedPath.PlayerPath" @bind-Value:after="@(() => ModalAction.ClearFieldError(ExcludedPathField(excludedPath)))" Label="Player Path"
+                              @attributes="ModalAction.FieldErrorAttributes(ExcludedPathField(excludedPath))"
+                              Immediate="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mt-1"
+                               aria-label="Remove excluded path" OnClick="@(() => RemoveExcludedPath(excludedPath))" />
+            </div>
+        }
+
+        <MudButton id="kodi-add-excluded-path" StartIcon="@Icons.Material.Filled.Add" Class="mt-2" OnClick="AddExcludedPath">Add Excluded Path</MudButton>
+    }
 </IntegrationModal>

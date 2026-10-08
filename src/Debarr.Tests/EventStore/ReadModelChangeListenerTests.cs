@@ -27,7 +27,7 @@ public sealed class ReadModelChangeListenerTests : AppTestContext
         {
             await session.Events.AppendAtCurrentVersionAsync(Library.StreamId, new LibrarySettingsChanged(Library.Default.Settings));
             await session.Events.AppendAtCurrentVersionAsync(DetectionSettings.StreamId, new DetectionSettingsChanged(3, DetectionSettings.Default.PictureMeasurement, 600));
-            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Theater", true, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, []));
+            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Theater", true, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, [], []));
             await session.Events.AppendAtCurrentVersionAsync(Notifiers.StreamId, new NotifierAdded(Guid.NewGuid(), "Sink", true, WebhookSettings.Create("http://sink.local", WebhookMethod.Post, []).Value));
             await session.Events.AppendAtCurrentVersionAsync(UISettings.StreamId, new UISettingsChanged(UITheme.Dark, DateTimeFormats.Default, false));
             await session.SaveChangesAsync(CancellationToken);
@@ -60,7 +60,7 @@ public sealed class ReadModelChangeListenerTests : AppTestContext
     public async Task A_commit_publishes_each_event_it_appended_in_order()
     {
         var playerId = Guid.NewGuid();
-        var added = new PlayerAdded(playerId, "Theater", true, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, []);
+        var added = new PlayerAdded(playerId, "Theater", true, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, [], []);
         var renamed = new PlayerRenamed(playerId, "Lounge");
         var committed = new ConcurrentQueue<object>();
         using var subscription = GetAppService<ReadModelChangeListener>().Committed<object>().Subscribe(committed.Enqueue);

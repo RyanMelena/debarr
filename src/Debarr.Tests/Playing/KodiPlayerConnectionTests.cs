@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Debarr.Detecting;
 using Debarr.Playing;
+using Debarr.Scanning;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
@@ -92,6 +93,32 @@ public sealed class KodiPlayerConnectionTests : IAsyncDisposable
         await Poll.UntilAsync(() => PlaybackStarted.Any());
         Assert.Single(PlaybackStarted);
         Assert.Equal([ArrivalGetItemParameters], _server.RequestParameters("Player.GetItem"));
+    }
+
+    [Fact]
+    public async Task An_OnPlay_of_an_excluded_path_inside_a_mapped_one_emits_nothing_and_logs_no_path()
+    {
+        var logger = new FakeLogger<KodiPlayerConnection>();
+        var endpoint = KodiEndpoint.Create("127.0.0.1", _server.Port, 60, 5).Value;
+        var player = new Player(
+            PlayerId,
+            "Theater",
+            true,
+            endpoint,
+            [new PathMapping(new PlayerPath("smb://nas/media"), new LocalPath("/media"))],
+            [new PlayerPath("smb://nas/media/private")]);
+        _server.Respond("Player.GetItem", """{"item":{"type":"movie","label":"Secret","title":"Secret","file":"smb://nas/media/private/Secret.mkv"}}""");
+        using var subscription = new KodiPlayerConnection(player, endpoint, TimeProvider.System, logger).Events.Subscribe(_events.Enqueue);
+        await Poll.UntilAsync(() => States.OfType<PlayerConnectionState.Connected>().Any());
+
+        await _server.SendRawAsync(OnPlay("movie", 1));
+        await Poll.UntilAsync(() => logger.Collector.GetSnapshot().Any(record => record.Message == "Theater played an excluded path, so its playback was ignored."));
+        _server.Respond("Player.GetItem", ArrivalItem);
+        await _server.SendRawAsync(OnPlay("movie", 1));
+
+        await Poll.UntilAsync(() => PlaybackStarted.Any());
+        Assert.Equal(new PlayerPath("smb://nas/media/movies/Arrival (2016)/Arrival.mkv"), Assert.Single(PlaybackStarted).PlayerPath);
+        Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Message.Contains("Secret", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -192,7 +219,7 @@ public sealed class KodiPlayerConnectionTests : IAsyncDisposable
 
     /// <summary>Subscribes, which opens a connection, and waits until it is connected, so notifications sent next reach it.</summary>
     private static KodiPlayerConnection Connection(string name, KodiEndpoint endpoint, TimeProvider timeProvider, ILogger<KodiPlayerConnection> logger) =>
-        new(new Player(PlayerId, name, true, endpoint, []), endpoint, timeProvider, logger);
+        new(new Player(PlayerId, name, true, endpoint, [], []), endpoint, timeProvider, logger);
 
     private async Task<IDisposable> ConnectAsync(TimeProvider? timeProvider = null, int pingIntervalSeconds = 60, int requestTimeoutSeconds = 5)
     {

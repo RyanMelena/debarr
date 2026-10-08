@@ -85,10 +85,10 @@ public sealed class PlaybackHandlerTests : IAsyncLifetime
         await TestLibrary.AddRootFolderAsync(_host.Services.GetRequiredService<IDocumentStore>(), Root, CancellationToken);
         var runtime = _host.Services.GetRequiredService<IWolverineRuntime>();
         Assert.True((await runtime.SendCommandAsync(
-            new SavePlayer(_theaterId, "Theater", true, KodiEndpoint.Create("127.0.0.1", _theater.Port, 60, 10).Value, [new PathMappingEntry("smb://nas/media", Root)]),
+            new SavePlayer(_theaterId, "Theater", true, KodiEndpoint.Create("127.0.0.1", _theater.Port, 60, 10).Value, [new PathMappingEntry("smb://nas/media", Root)], []),
             CancellationToken)).IsSuccess);
         Assert.True((await runtime.SendCommandAsync(
-            new SavePlayer(_bedroomId, "Bedroom", true, KodiEndpoint.Create("127.0.0.1", _bedroom.Port, 60, 10).Value, []),
+            new SavePlayer(_bedroomId, "Bedroom", true, KodiEndpoint.Create("127.0.0.1", _bedroom.Port, 60, 10).Value, [], []),
             CancellationToken)).IsSuccess);
         Assert.True((await runtime.SendCommandAsync(
             new SaveNotifier(_automationId, "automation", true, WebhookSettings.Create("http://automation.lan/debarr", WebhookMethod.Post, []).Value),

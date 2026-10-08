@@ -151,7 +151,7 @@ public sealed class StatusPageTests : PageTestContext
         var playerId = Guid.NewGuid();
         await using (var session = store.LightweightSession())
         {
-            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(playerId, "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, []));
+            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(playerId, "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, [], []));
             await session.SaveChangesAsync(CancellationToken);
         }
 

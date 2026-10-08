@@ -52,7 +52,7 @@ public sealed class PlayerConnectionHealthCheckTests : AppTestContext
 
         await using (var session = GetAppService<IDocumentStore>().LightweightSession())
         {
-            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, []));
+            await session.Events.AppendAtCurrentVersionAsync(Players.StreamId, new PlayerAdded(Guid.NewGuid(), "Bedroom", false, KodiEndpoint.Create("kodi.local", 9090, 60, 10).Value, [], []));
             await session.SaveChangesAsync(CancellationToken);
         }
 
@@ -70,6 +70,6 @@ public sealed class PlayerConnectionHealthCheckTests : AppTestContext
 
     private Task SavePlayerAsync(string name, int port, bool enabled) =>
         GetAppService<IWolverineRuntime>().SendCommandAsync(
-            new SavePlayer(Guid.NewGuid(), name, enabled, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, []),
+            new SavePlayer(Guid.NewGuid(), name, enabled, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, [], []),
             CancellationToken);
 }

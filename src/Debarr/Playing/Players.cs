@@ -28,10 +28,10 @@ public sealed record Players(IReadOnlyList<Player> All, IReadOnlyList<Guid> Remo
     public static Players Create(PlayerAdded added) => Empty.Apply(added);
 
     public Players Apply(PlayerAdded added) =>
-        this with { All = [.. All, new Player(added.PlayerId, added.Name, added.Enabled, added.Endpoint, added.PathMappings)] };
+        this with { All = [.. All, new Player(added.PlayerId, added.Name, added.Enabled, added.Endpoint, added.PathMappings, added.ExcludedPaths ?? [])] };
 
     public Players Apply(PlayerChanged changed) =>
-        WithPlayer(changed.PlayerId, player => player with { Enabled = changed.Enabled, Endpoint = changed.Endpoint, PathMappings = changed.PathMappings });
+        WithPlayer(changed.PlayerId, player => player with { Enabled = changed.Enabled, Endpoint = changed.Endpoint, PathMappings = changed.PathMappings, ExcludedPaths = changed.ExcludedPaths ?? [] });
 
     public Players Apply(PlayerRenamed renamed) => WithPlayer(renamed.PlayerId, player => player with { Name = renamed.Name });
 
@@ -42,8 +42,17 @@ public sealed record Players(IReadOnlyList<Player> All, IReadOnlyList<Guid> Remo
         this with { All = [.. All.Select(player => player.Id == id ? change(player) : player)] };
 }
 
-/// <summary>A media player Debarr connects to: its unique name, whether it is enabled, its type's endpoint and its path mappings.</summary>
-public sealed record Player(Guid Id, string Name, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings);
+/// <summary>A media player Debarr connects to: its unique name, whether it is enabled, its type's endpoint, its path mappings and its excluded paths.</summary>
+/// <param name="ExcludedPaths">Player paths whose playback Debarr ignores, canonical under the player type's rules.</param>
+public sealed record Player(Guid Id, string Name, bool Enabled, PlayerEndpoint Endpoint, IReadOnlyList<PathMapping> PathMappings, IReadOnlyList<PlayerPath> ExcludedPaths)
+{
+    /// <summary>Whether an excluded path covers <paramref name="path"/> by more whole segments than every path mapping that covers it.</summary>
+    public bool Excludes(PlayerPath path) =>
+        LongestCovering(ExcludedPaths, path) > LongestCovering(PathMappings.Select(pathMapping => pathMapping.PlayerPath), path);
+
+    private static int LongestCovering(IEnumerable<PlayerPath> playerPaths, PlayerPath path) =>
+        playerPaths.Where(playerPath => playerPath.Covers(path)).Select(playerPath => playerPath.Value.Length).DefaultIfEmpty(-1).Max();
+}
 
 /// <summary>Where a player of one type listens, and how that type writes the paths it reports; its type is the player's type.</summary>
 [JsonPolymorphic]

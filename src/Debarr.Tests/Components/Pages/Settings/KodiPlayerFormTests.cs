@@ -51,7 +51,7 @@ public class KodiPlayerFormTests
     [Fact]
     public void From_kodi_player_keeps_a_saved_players_id()
     {
-        var form = KodiPlayerForm.FromKodiPlayer(new Player(PlayerId, "Theater", true, Endpoint, []), Endpoint);
+        var form = KodiPlayerForm.FromKodiPlayer(new Player(PlayerId, "Theater", true, Endpoint, [], []), Endpoint);
 
         Assert.Equal((PlayerId, false), (form.Id, form.IsNew));
         Assert.Equal(PlayerId, form.ToSavePlayer(Players.Empty).Value.PlayerId);

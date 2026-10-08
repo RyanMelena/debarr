@@ -15,7 +15,7 @@ public sealed class PlayerConnectionFactoryTests
     [Fact]
     public void A_player_type_with_no_connection_is_refused()
     {
-        var exception = Assert.Throws<NotSupportedException>(() => Factory.Create(new Player(Guid.NewGuid(), "Lounge", true, new UnknownEndpoint(), [])));
+        var exception = Assert.Throws<NotSupportedException>(() => Factory.Create(new Player(Guid.NewGuid(), "Lounge", true, new UnknownEndpoint(), [], [])));
 
         Assert.Equal("The player endpoint UnknownEndpoint has no connection.", exception.Message);
     }
@@ -47,7 +47,7 @@ public sealed class PlayerConnectionFactoryTests
     }
 
     private static Player KodiPlayer(int port) =>
-        new(Guid.NewGuid(), "Theater", true, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, []);
+        new(Guid.NewGuid(), "Theater", true, KodiEndpoint.Create("127.0.0.1", port, 60, 10).Value, [], []);
 
     private sealed record UnknownEndpoint : PlayerEndpoint
     {

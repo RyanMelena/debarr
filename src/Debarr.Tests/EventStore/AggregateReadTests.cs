@@ -37,7 +37,7 @@ public sealed class AggregateReadTests : AppTestContext
     {
         var settings = new LibrarySettings(VideoExtensions.Parse("mkv").Value, new ScanInterval(6), false);
         var formats = new DateTimeFormats("yyyy-MM-dd", "dddd, MMMM d yyyy", "HH:mm");
-        var theater = new PlayerAdded(Guid.NewGuid(), "Theater", true, Endpoint, []);
+        var theater = new PlayerAdded(Guid.NewGuid(), "Theater", true, Endpoint, [], []);
         var automation = new NotifierAdded(Guid.NewGuid(), "automation", false, WebhookSettings.Create("http://automation.local", WebhookMethod.Post, []).Value);
         await AppendAsync(Library.StreamId, new LibrarySettingsChanged(settings));
         await AppendAsync(DetectionSettings.StreamId, new DetectionSettingsChanged(4, new PictureMeasurement(20, 10, 16, 64), 60));
@@ -56,6 +56,18 @@ public sealed class AggregateReadTests : AppTestContext
         Assert.Equal(
             (automation.NotifierId, "automation", false, new Uri("http://automation.local"), WebhookMethod.Post),
             (notifier.Id, notifier.Name, notifier.Enabled, ((WebhookSettings)notifier.Settings).Url, ((WebhookSettings)notifier.Settings).Method));
+    }
+
+    [Fact]
+    public async Task A_player_saved_with_no_excluded_paths_stored_reads_with_none()
+    {
+        var theater = new PlayerAdded(Guid.NewGuid(), "Theater", true, Endpoint, [], null);
+        await AppendAsync(Players.StreamId, theater, new PlayerChanged(theater.PlayerId, false, Endpoint, [], null));
+
+        await using var session = Store.QuerySession();
+
+        var player = Assert.Single((await Players.ReadAsync(session, CancellationToken)).All);
+        Assert.Equal((false, 0), (player.Enabled, player.ExcludedPaths.Count));
     }
 
     [Fact]

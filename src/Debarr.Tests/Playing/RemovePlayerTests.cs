@@ -6,7 +6,7 @@ public sealed class RemovePlayerTests
 {
     private static readonly Guid PlayerId = Guid.NewGuid();
 
-    private static readonly Players Stored = Players.Create(new PlayerAdded(PlayerId, "Theater", true, KodiEndpoint.Create("kodi.lan", 9090, 60, 10).Value, []));
+    private static readonly Players Stored = Players.Create(new PlayerAdded(PlayerId, "Theater", true, KodiEndpoint.Create("kodi.lan", 9090, 60, 10).Value, [], []));
 
     [Fact]
     public void A_player_is_removed()
